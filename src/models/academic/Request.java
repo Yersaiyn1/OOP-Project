@@ -48,4 +48,5 @@ public class Request implements Serializable {
     public void setResponse(String response) {
         this.response = response;
     }
+
 }

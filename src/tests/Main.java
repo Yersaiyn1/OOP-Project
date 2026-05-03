@@ -12,28 +12,35 @@ import java.time.LocalDate;
 public class Main {
 
     public static void main(String[] args) throws IOException {
+
+        // Save state on any shutdown — normal exit, Ctrl+C (SIGINT), or SIGTERM.
+        // Without this, abrupt termination loses all in-memory changes since
+        // the last save. JVM guarantees the hook runs unless killed by SIGKILL.
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                UniversitySystem.getInstance().shutdown();
+            } catch (Exception e) {
+                System.err.println("[shutdown-hook] error: " + e.getMessage());
+            }
+        }, "uni-shutdown-hook"));
+
         UniversitySystem.getInstance().start();
         seedIfEmpty();
         MainView.run();
     }
 
-    /**
-     * If the database has no users yet (first run), create a default Admin
-     * so the operator can log in. Credentials are printed to the console.
-     */
     private static void seedIfEmpty() {
         if (!Database.getInstance().getUsers().isEmpty()) return;
-
         Admin root = new Admin(
-                "A001",                 // id
-                "Root", "Admin",        // first/last
-                "admin@kbtu.kz",        // email
-                "admin",                // password
-                "+7 700 000 0000",      // phone
-                500_000.0,              // salary
-                LocalDate.now(),        // hire date
-                "IT",                   // department
-                10                      // access level
+                "A001",
+                "Root", "Admin",
+                "admin@kbtu.kz",
+                "admin",
+                "+7 700 000 0000",
+                500_000.0,
+                LocalDate.now(),
+                "IT",
+                10
         );
         Database.getInstance().getUsers().put(root.getId(), root);
         Logger.getInstance().log("seeded default admin (email=admin@kbtu.kz, password=admin)");

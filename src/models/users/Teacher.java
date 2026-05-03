@@ -1,137 +1,154 @@
 package models.users;
 
-import core.Logger;
-import core.observer.NewsEvent;
+import core.interfaces.Reportable;
+import core.strategy.ReportStrategy;
+import core.strategy.TeacherReportStrategy;
 import models.academic.Course;
+import models.academic.Lesson;
 import models.academic.Mark;
+import models.academic.RecommendationLetter;
 import models.academic.Report;
 import models.enums.TeacherTitle;
-import models.research.Researcher;
-import models.research.ResearchPaper;
-import models.research.ResearchProject;
 
-import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- * Класс Преподавателя (Teacher), наследующийся от Employee.
- * Реализует интерфейсы Researcher (для исследовательской деятельности) и Observer (для подписки на новости).
+ * Teacher — instructor; can put marks, take attendance, write recommendations.
+ *
+ * If the title is PROFESSOR, TeacherFactory auto-wraps the Teacher into
+ * a TeacherResearcher (Decorator pattern).
  */
-public class Teacher extends Employee implements Researcher, Serializable {
+public class Teacher extends Employee implements Reportable {
 
     private static final long serialVersionUID = 1L;
 
     private TeacherTitle title;
-    private final List<Course> courses;
-    private final List<Report> reports;
-    private final List<ResearchPaper> papers;
-    private final List<ResearchProject> projects;
-    private int hIndex;
+    private final List<Course> coursesTaught = new ArrayList<>();
+    private double rating;            // 0..5 running average
+    private int ratingCount;          // number of ratings received
 
     public Teacher(String id, String firstName, String lastName,
                    String email, String password, String phone,
-                   double salary, LocalDate hireDate, String department) {
-        super(id, firstName, lastName, email, password, phone, salary, hireDate, department);
-        this.title = TeacherTitle.TUTOR;
-        this.courses = new ArrayList<>();
-        this.reports = new ArrayList<>();
-        this.papers = new ArrayList<>();
-        this.projects = new ArrayList<>();
-        this.hIndex = 0;
+                   double salary, LocalDate hireDate, String department,
+                   TeacherTitle title) {
+        super(id, firstName, lastName, email, password, phone,
+                salary, hireDate, department);
+        this.title = title;
+        this.rating = 0;
+        this.ratingCount = 0;
     }
 
-    // Реализация абстрактного метода getRole из User
     @Override
     public String getRole() {
-        return "TEACHER";
+        return "Teacher";
     }
 
-    public TeacherTitle getTitle() {
-        return title;
-    }
-
-    public void setTitle(TeacherTitle title) {
-        this.title = title;
-    }
-
-    public List<Course> getCourses() {
-        return courses;
-    }
-
-    public void addCourse(Course course) {
-        if (course != null && !courses.contains(course)) {
-            courses.add(course);
-            Logger.getInstance().log(this, "added course: " + course.toString());
+    /**
+     * Put a mark for a student in a course. The mark is added to the
+     * student's transcript.
+     */
+    public void putMark(Student s, Course c, Mark m) {
+        if (s == null || c == null || m == null) return;
+        m.setStudent(s);
+        m.setCourse(c);
+        s.getTranscript().addMark(c, m);
+        if (!m.isPassing()) {
+            s.incrementFailedCourses();
         }
     }
 
-    @Override
-    public int getHIndex() {
-        return hIndex;
+    /**
+     * View students enrolled in one of this teacher's courses.
+     */
+    public List<Student> viewStudents(Course c) {
+        if (c == null) return new ArrayList<>();
+        return c.getEnrolledStudents();
     }
 
-    public void setHIndex(int hIndex) {
-        this.hIndex = hIndex;
+    /**
+     * Add a course to this teacher's load (and register the teacher with
+     * the course as one of its instructors).
+     */
+    public void manageCourse(Course c) {
+        if (c == null) return;
+        if (!coursesTaught.contains(c)) {
+            coursesTaught.add(c);
+        }
+        c.addInstructor(this);
     }
 
-    @Override
-    public List<ResearchPaper> getPapers() {
-        return papers;
+    public boolean isProfessor() {
+        return title == TeacherTitle.PROFESSOR;
     }
 
-    @Override
-    public List<ResearchProject> getProjects() {
-        return projects;
-    }
-
-    @Override
-    public void addPaper(ResearchPaper paper) {
-        if (paper != null && !papers.contains(paper)) {
-            papers.add(paper);
-            Logger.getInstance().log(this, "added research paper: " + paper.toString());
+    /**
+     * Walk the course's lessons and mark every enrolled student as present
+     * for the most recent lesson. Demo implementation — in real life the
+     * teacher would supply attendance per-student.
+     */
+    public void takeAttendance(Course c) {
+        if (c == null || c.getLessons().isEmpty()) return;
+        Lesson latest = c.getLessons().get(c.getLessons().size() - 1);
+        for (Student s : c.getEnrolledStudents()) {
+            latest.markAttendance(s, true);
         }
     }
 
+    /**
+     * Generate a mark report for a course (BONUS: TeacherReportStrategy).
+     */
+    public Report generateMarkReport(Course c) {
+        ReportStrategy s = new TeacherReportStrategy();
+        Map<String, Object> data = new HashMap<>();
+        data.put("teacher", this);
+        data.put("course", c);
+        return s.build(data);
+    }
+
+    /**
+     * Write a recommendation letter for a student (BONUS).
+     * The letter is also pushed onto the student's recommendations list.
+     */
+    public RecommendationLetter writeRecommendation(Student s, String content, String purpose) {
+        if (s == null) return null;
+        RecommendationLetter letter = new RecommendationLetter(this, s, content, purpose);
+        s.addRecommendation(letter);
+        return letter;
+    }
+
+    /**
+     * Receive a rating from a Student (0..5). Updates the running average.
+     * Package-private convention: only Student.rateTeacher() should call this.
+     */
+    public void receiveRating(double newRating) {
+        if (newRating < 0 || newRating > 5) return;
+        double total = rating * ratingCount + newRating;
+        ratingCount++;
+        rating = total / ratingCount;
+    }
+
+    /**
+     * Reportable: the teacher's own self-report (uses the same strategy
+     * as generateMarkReport for the first taught course, if any).
+     */
     @Override
-    public void joinProject(ResearchProject project) {
-        if (project != null && !projects.contains(project)) {
-            projects.add(project);
-            Logger.getInstance().log(this, "joined research project: " + project.toString());
-        }
+    public Report generateReport() {
+        Report r = new Report("Teacher Report — " + getFullName());
+        r.put("teacher", getFullName());
+        r.put("title", title);
+        r.put("courses", coursesTaught.size());
+        r.put("rating", String.format("%.2f / 5.0", rating));
+        return r;
     }
 
-    @Override
-    public void printPapers(Comparator<ResearchPaper> comparator) {
-        if (comparator != null) {
-            papers.sort(comparator);
-        }
-        for (ResearchPaper p : papers) {
-            System.out.println(p.toString());
-        }
-    }
+    public TeacherTitle getTitle()          { return title; }
+    public List<Course> getCoursesTaught()  { return coursesTaught; }
+    public double getRating()               { return rating; }
+    public int getRatingCount()             { return ratingCount; }
 
-    public List<Report> getReports() {
-        return reports;
-    }
-
-    public void addReport(Report report) {
-        if (report != null) {
-            reports.add(report);
-            Logger.getInstance().log(this, "submitted report");
-        }
-    }
-
-    @Override
-    public void update(NewsEvent event) {
-        System.out.println("[" + getFullName() + "] Получил новость: " + event.getNews());
-    }
-
-    public void submitMark(Student student, Course course, Mark mark) {
-        if (student != null && course != null && mark != null) {
-            Logger.getInstance().log(this, "submitted mark to " + student.getFullName());
-        }
-    }
+    public void setTitle(TeacherTitle title) { this.title = title; }
 }

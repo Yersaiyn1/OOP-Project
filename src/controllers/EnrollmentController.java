@@ -2,96 +2,65 @@ package controllers;
 
 import core.AuthService;
 import core.Logger;
-import data.Database;
 import models.academic.Course;
+import models.exceptions.CourseFailLimitException;
+import models.exceptions.CreditLimitExceededException;
+import models.exceptions.LowHIndexException;
+import models.research.Researcher;
 import models.users.Student;
 import models.users.User;
-import models.exceptions.CreditLimitExceededException;
 
-import java.util.List;
-import java.util.ArrayList;
+/**
+ * Controller for course registration and supervisor assignment.
+ */
+public final class EnrollmentController {
 
-public class EnrollmentController {
+    private EnrollmentController() {}
 
-    private EnrollmentController() {
-    }
-
-    public static boolean enrollStudentInCourse(String studentId, String courseId) {
-        User currentUser = AuthService.getInstance().getCurrentUser();
-        if (currentUser == null) {
-            Logger.getInstance().log(null, "Attempt to enroll student by unauthenticated user.");
+    /**
+     * Register the currently logged-in student for a course.
+     * Catches business-rule violations and reports them on the console.
+     *
+     * @return true on success, false on rejection
+     */
+    public static boolean registerForCourse(Course c) {
+        User current = AuthService.getInstance().getCurrentUser();
+        if (!(current instanceof Student)) {
+            System.out.println("[enrollment] only students can register for courses");
             return false;
         }
-
-        Student student = (Student) Database.getInstance().getUserById(studentId);
-        Course course = Database.getInstance().getCourseById(courseId);
-
-        if (student == null) {
-            Logger.getInstance().log(currentUser, "Enrollment failed: Student with ID " + studentId + " not found.");
-            return false;
-        }
-        if (course == null) {
-            Logger.getInstance().log(currentUser, "Enrollment failed: Course with ID " + courseId + " not found.");
-            return false;
-        }
-
-        if (student.getEnrolledCourses().contains(course)) {
-            Logger.getInstance().log(currentUser, "Enrollment failed: Student " + student.getId() + " already enrolled in course " + course.getCourseId());
-            return false;
-        }
-
+        Student s = (Student) current;
         try {
-            student.registerForCourse(course);
-            course.enrollStudent(student);
-            Logger.getInstance().log(currentUser, "Student " + student.getId() + " enrolled in course " + course.getCourseId());
+            s.registerForCourse(c);
+            Logger.getInstance().log(s, "registered for course " + c.getCourseId());
             return true;
         } catch (CreditLimitExceededException e) {
-            Logger.getInstance().log(currentUser, "Enrollment failed for student " + student.getId() + " in course " + course.getCourseId() + ": " + e.getMessage());
-            return false;
-        } catch (Exception e) {
-            Logger.getInstance().log(currentUser, "An unexpected error occurred during enrollment: " + e.getMessage());
-            return false;
+            System.out.println("[enrollment] " + e.getMessage());
+        } catch (CourseFailLimitException e) {
+            System.out.println("[enrollment] " + e.getMessage());
         }
+        return false;
     }
 
-    public static boolean dropStudentFromCourse(String studentId, String courseId) {
-        User currentUser = AuthService.getInstance().getCurrentUser();
-        if (currentUser == null) {
-            Logger.getInstance().log(null, "Attempt to drop student from course by unauthenticated user.");
+    /**
+     * Assign a supervisor to the currently logged-in student.
+     */
+    public static boolean assignSupervisor(Researcher r) {
+        User current = AuthService.getInstance().getCurrentUser();
+        if (!(current instanceof Student)) {
+            System.out.println("[enrollment] only students can be assigned a supervisor");
             return false;
         }
-
-        Student student = (Student) Database.getInstance().getUserById(studentId);
-        Course course = Database.getInstance().getCourseById(courseId);
-
-        if (student == null || course == null) {
-            Logger.getInstance().log(currentUser, "Drop failed: Student or Course not found (Student ID: " + studentId + ", Course ID: " + courseId + ").");
-            return false;
+        Student s = (Student) current;
+        try {
+            s.assignSupervisor(r);
+            Logger.getInstance().log(s, "assigned supervisor (h-index " + r.getHIndex() + ")");
+            return true;
+        } catch (LowHIndexException e) {
+            System.out.println("[enrollment] " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            System.out.println("[enrollment] " + e.getMessage());
         }
-
-        if (!student.getEnrolledCourses().contains(course)) {
-            Logger.getInstance().log(currentUser, "Drop failed: Student " + student.getId() + " not enrolled in course " + course.getCourseId());
-            return false;
-        }
-
-        student.getEnrolledCourses().remove(course);
-        course.getEnrolledStudents().remove(student);
-        Logger.getInstance().log(currentUser, "Student " + student.getId() + " dropped from course " + course.getCourseId());
-        return true;
-    }
-
-    public static List<Course> getStudentEnrollments(String studentId) {
-        User currentUser = AuthService.getInstance().getCurrentUser();
-        if (currentUser == null) {
-            Logger.getInstance().log(null, "Attempt to get enrollments by unauthenticated user.");
-            return null;
-        }
-
-        Student student = (Student) Database.getInstance().getUserById(studentId);
-        if (student == null) {
-            Logger.getInstance().log(currentUser, "Failed to get enrollments: Student with ID " + studentId + " not found.");
-            return null;
-        }
-        return student.getEnrolledCourses();
+        return false;
     }
 }

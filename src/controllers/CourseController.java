@@ -4,79 +4,72 @@ import core.AuthService;
 import core.Logger;
 import data.Database;
 import models.academic.Course;
-import models.enums.Major;
-import models.enums.StudyYear;
+import models.users.Manager;
+import models.users.Teacher;
 import models.users.User;
-import core.builder.CourseBuilder;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
-public class CourseController {
+/**
+ * Controller for course catalog operations.
+ */
+public final class CourseController {
 
-    private CourseController() {
-    }
+    private CourseController() {}
 
-    public static Course createCourse(String name, int credits, Major targetMajor, StudyYear targetYear) {
-        User currentUser = AuthService.getInstance().getCurrentUser();
-        if (currentUser == null) {
-            Logger.getInstance().log("Attempt to create course by unauthenticated user.");
-            return null;
+    /**
+     * List every course in the catalog.
+     */
+    public static Collection<Course> listAll() {
+        if (!AuthService.getInstance().isLoggedIn()) {
+            System.out.println("[course] login required");
+            return List.of();
         }
-
-        Course newCourse = new CourseBuilder()
-                .withName(name)
-                .withCredits(credits)
-                .withTargetMajor(targetMajor)
-                .withTargetYear(targetYear)
-                .build();
-
-        Database.getInstance().addCourse(newCourse);
-        Logger.getInstance().log(currentUser.getId(), "Course '" + name + "' created.");
-        return newCourse;
+        List<Course> out = new ArrayList<>();
+        for (Object v : Database.getInstance().getCourses().values()) {
+            if (v instanceof Course) out.add((Course) v);
+        }
+        return out;
     }
 
-    public static Course getCourseById(String courseId) {
-        return Database.getInstance().getCourseById(courseId);
+    /**
+     * Find a course by id.
+     */
+    public static Course findById(String id) {
+        Object v = Database.getInstance().getCourses().get(id);
+        return (v instanceof Course) ? (Course) v : null;
     }
 
-    public static List<Course> getAllCourses() {
-        return (List<Course>) Database.getInstance().getAllCourses();
-    }
-
-    public static boolean updateCourse(String courseId, String newName, int newCredits, Major newMajor, StudyYear newYear) {
-        User currentUser = AuthService.getInstance().getCurrentUser();
-        if (currentUser == null) {
-            Logger.getInstance().log("Attempt to update course by unauthenticated user.");
+    /**
+     * Add a course to the catalog. Managers only.
+     */
+    public static boolean addCourse(Course c) {
+        User current = AuthService.getInstance().getCurrentUser();
+        if (!(current instanceof Manager)) {
+            System.out.println("[course] manager privileges required");
             return false;
         }
-
-        Course course = Database.getInstance().getCourseById(courseId);
-        if (course == null) {
-            Logger.getInstance().log(currentUser.getId(), "Attempt to update non-existent course with ID: " + courseId);
-            return false;
-        }
-
-        course.setName(newName);
-        course.setCredits(newCredits);
-        course.setTargetMajor(newMajor);
-        course.setTargetYear(newYear);
-        Logger.getInstance().log(currentUser.getId(), "Course '" + course.getName() + "' (ID: " + courseId + ") updated.");
+        if (c == null) return false;
+        Database.getInstance().getCourses().put(c.getCourseId(), c);
+        Logger.getInstance().log(current, "added course " + c.getCourseId());
         return true;
     }
 
-    public static boolean deleteCourse(String courseId) {
-        User currentUser = AuthService.getInstance().getCurrentUser();
-        if (currentUser == null) {
-            Logger.getInstance().log("Attempt to delete course by unauthenticated user.");
+    /**
+     * Assign a teacher to a course. Managers only.
+     */
+    public static boolean assignTeacher(Teacher t, Course c) {
+        User current = AuthService.getInstance().getCurrentUser();
+        if (!(current instanceof Manager)) {
+            System.out.println("[course] manager privileges required");
             return false;
         }
-
-        boolean deleted = Database.getInstance().removeCourse(courseId);
-        if (deleted) {
-            Logger.getInstance().log(currentUser.getId(), "Course with ID: " + courseId + " deleted.");
-        } else {
-            Logger.getInstance().log(currentUser.getId(), "Attempt to delete non-existent course with ID: " + courseId);
-        }
-        return deleted;
+        if (t == null || c == null) return false;
+        ((Manager) current).assignCourse(t, c);
+        Logger.getInstance().log(current,
+                "assigned " + t.getFullName() + " to " + c.getCourseId());
+        return true;
     }
 }

@@ -5,37 +5,44 @@ import models.academic.Mark;
 import models.academic.Transcript;
 import models.users.Student;
 
-import java.util.HashMap;
-import java.util.Map;
-
+/**
+ * TranscriptBuilder — fluent builder for Transcript.
+ *
+ * Usage:
+ *   Transcript t = new TranscriptBuilder()
+ *       .setStudent(alice)
+ *       .addMark(course1, mark1)
+ *       .addMark(course2, mark2)
+ *       .build();
+ */
 public class TranscriptBuilder {
+
     private Student student;
-    private Map<Course, Mark> marks;
+    private Transcript transcript;
 
-    public TranscriptBuilder() {
-        this.marks = new HashMap<>();
-    }
-
-    public TranscriptBuilder withStudent(Student student) {
-        this.student = student;
+    public TranscriptBuilder setStudent(Student s) {
+        this.student = s;
+        if (this.transcript == null) {
+            this.transcript = new Transcript(s);
+        } else {
+            this.transcript.setStudent(s);
+        }
         return this;
     }
 
-    public TranscriptBuilder withMark(Course course, Mark mark) {
-        if (course != null && mark != null) {
-            this.marks.put(course, mark);
+    public TranscriptBuilder addMark(Course c, Mark m) {
+        if (this.transcript == null) {
+            this.transcript = new Transcript(student);
         }
+        this.transcript.addMark(c, m);
         return this;
     }
 
     public Transcript build() {
-        if (student == null) {
-            throw new IllegalStateException("Student must be set for the transcript.");
+        if (this.transcript == null) {
+            this.transcript = new Transcript(student);
         }
-        Transcript transcript = new Transcript(student);
-        for (Map.Entry<Course, Mark> entry : marks.entrySet()) {
-            transcript.putMark(entry.getKey(), entry.getValue());
-        }
-        return transcript;
+        this.transcript.calculateGPA();
+        return this.transcript;
     }
 }

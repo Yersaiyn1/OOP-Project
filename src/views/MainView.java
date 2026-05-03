@@ -2,8 +2,7 @@ package views;
 
 import controllers.AuthController;
 import controllers.UniversitySystem;
-import models.users.Admin;
-import models.users.User;
+import models.users.*;
 
 import java.io.IOException;
 
@@ -60,16 +59,13 @@ public class MainView extends BaseView {
                     AdminView.show((Admin) user);
                     break;
                 case "Student":
-                    // StudentView.show((Student) user);   // implemented by Y
-                    System.out.println("[StudentView not yet implemented in this build]");
+                    StudentView.show((Student) user);
                     break;
                 case "Teacher":
-                    // TeacherView.show((Teacher) user);   // implemented by D
-                    System.out.println("[TeacherView not yet implemented in this build]");
+                    TeacherView.show((Teacher) user);
                     break;
                 case "Manager":
-                    // ManagerView.show((Manager) user);   // implemented by Y
-                    System.out.println("[ManagerView not yet implemented in this build]");
+                    ManagerView.show((Manager) user);
                     break;
                 default:
                     System.out.println("No view registered for role: " + user.getRole());

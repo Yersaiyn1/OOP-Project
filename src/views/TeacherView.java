@@ -1,129 +1,133 @@
 package views;
 
-import core.Logger;
+import controllers.MarkController;
+import data.Database;
+import models.academic.Course;
+import models.users.Student;
 import models.users.Teacher;
+import models.users.User;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Serializable;
+import java.util.List;
 
 /**
- * Класс TeacherView для отображения меню действий преподавателя.
+ * TeacherView — menu for teachers.
  */
-public class TeacherView implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class TeacherView extends BaseView {
 
-    private static final BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+    private TeacherView() {}
 
-    /**
-     * Отображает главное меню преподавателя.
-     *
-     * @param teacher Текущий преподаватель
-     * @throws IOException В случае ошибок ввода-вывода
-     */
-    public static void showMenu(Teacher teacher) throws IOException {
-        if (teacher == null) {
-            System.out.println("Ошибка: Преподаватель не найден.");
-            return;
-        }
-
-        boolean exit = false;
-
-        System.out.println("\n====================================");
-        System.out.println("  Кабинет преподавателя: " + teacher.getFullName());
-        System.out.println("====================================");
-
-        while (!exit) {
-            System.out.println("\nВыберите действие:");
-            System.out.println("1. Посмотреть мои курсы");
-            System.out.println("2. Просмотреть и обработать отчеты");
-            System.out.println("3. Посмотреть мои научные статьи");
-            System.out.println("4. Просмотреть мои проекты");
-            System.out.println("5. Поставить оценку студенту");
-            System.out.println("0. Выход");
-            System.out.print("\nВведите номер действия: ");
-
-            String choice = reader.readLine();
+    public static void show(Teacher teacher) throws IOException {
+        while (true) {
+            heading("TEACHER — " + teacher.getFullName() + " (" + teacher.getTitle() + ")");
+            System.out.println("1) View my courses");
+            System.out.println("2) View students of a course");
+            System.out.println("3) Put mark");
+            System.out.println("4) Take attendance for a course");
+            System.out.println("5) Generate mark report");
+            System.out.println("6) Write recommendation");
+            System.out.println("0) Logout");
+            String choice = prompt("> ");
 
             switch (choice) {
-                case "1":
-                    viewCourses(teacher);
-                    break;
-                case "2":
-                    processReports(teacher);
-                    break;
-                case "3":
-                    viewPapers(teacher);
-                    break;
-                case "4":
-                    viewProjects(teacher);
-                    break;
-                case "5":
-                    submitMarkMenu(teacher);
-                    break;
-                case "0":
-                    System.out.println("Выход из системы...");
-                    Logger.getInstance().log(teacher, "logged out");
-                    exit = true;
-                    break;
-                default:
-                    System.out.println("Неверный выбор. Пожалуйста, попробуйте снова.");
+                case "1": listCourses(teacher);            break;
+                case "2": viewStudents(teacher);           break;
+                case "3": putMark(teacher);                break;
+                case "4": takeAttendance(teacher);         break;
+                case "5": markReport(teacher);             break;
+                case "6": writeRecommendation(teacher);    break;
+                case "0": return;
+                default:  System.out.println("Unknown option.");
             }
         }
     }
 
-    private static void viewCourses(Teacher teacher) {
-        System.out.println("\n--- Ваши курсы ---");
-        if (teacher.getCourses().isEmpty()) {
-            System.out.println("У вас пока нет добавленных курсов.");
-        } else {
-            teacher.getCourses().forEach(c -> System.out.println("- " + c.toString()));
+    private static void listCourses(Teacher t) {
+        if (t.getCoursesTaught().isEmpty()) {
+            System.out.println("You don't teach any courses yet.");
+            return;
+        }
+        for (Course c : t.getCoursesTaught()) {
+            System.out.println("  " + c);
         }
     }
 
-    private static void processReports(Teacher teacher) {
-        System.out.println("\n--- Обработка отчетов ---");
-        if (teacher.getReports().isEmpty()) {
-            System.out.println("У вас нет отчетов для обработки.");
-        } else {
-            teacher.getReports().forEach(r -> {
-                System.out.println("ID отчета: " + r.getReportId());
-                System.out.println("Содержимое: " + r.getContent());
-                System.out.println("Дата создания: " + r.getCreatedAt());
-                System.out.println("---------------------------------");
-            });
+    private static void viewStudents(Teacher t) throws IOException {
+        Course c = pickCourse(t);
+        if (c == null) return;
+        List<Student> students = t.viewStudents(c);
+        if (students.isEmpty()) {
+            System.out.println("No students enrolled.");
+            return;
+        }
+        for (Student s : students) {
+            System.out.println("  " + s);
         }
     }
 
-    private static void viewPapers(Teacher teacher) {
-        System.out.println("\n--- Ваши научные статьи ---");
-        if (teacher.getPapers().isEmpty()) {
-            System.out.println("У вас пока нет добавленных статей.");
-        } else {
-            teacher.printPapers(null);
+    private static void putMark(Teacher t) throws IOException {
+        Course c = pickCourse(t);
+        if (c == null) return;
+        String studentId = prompt("Student id (in DB): ");
+        User u = Database.getInstance().getUsers().get(studentId);
+        if (!(u instanceof Student)) {
+            System.out.println("Not a student.");
+            return;
         }
+        double f = parseDouble(prompt("First attestation: "));
+        double s = parseDouble(prompt("Second attestation: "));
+        double e = parseDouble(prompt("Final exam: "));
+        boolean ok = MarkController.putMark((Student) u, c, f, s, e);
+        System.out.println(ok ? "Mark recorded." : "Failed.");
     }
 
-    private static void viewProjects(Teacher teacher) {
-        System.out.println("\n--- Ваши проекты ---");
-        if (teacher.getProjects().isEmpty()) {
-            System.out.println("У вас пока нет активных проектов.");
-        } else {
-            teacher.getProjects().forEach(p -> System.out.println("- " + p.getProjectName()));
+    private static void takeAttendance(Teacher t) throws IOException {
+        Course c = pickCourse(t);
+        if (c == null) return;
+        if (c.getLessons().isEmpty()) {
+            System.out.println("No lessons yet for this course.");
+            return;
         }
+        t.takeAttendance(c);
+        System.out.println("Attendance marked for the latest lesson.");
     }
 
-    private static void submitMarkMenu(Teacher teacher) throws IOException {
-        System.out.println("\n--- Выставление оценки ---");
-        System.out.print("Введите ID студента: ");
-        String studentId = reader.readLine();
-        System.out.print("Введите ID курса: ");
-        String courseId = reader.readLine();
-        System.out.print("Введите оценку (например, A, B, C): ");
-        String score = reader.readLine();
+    private static void markReport(Teacher t) throws IOException {
+        Course c = pickCourse(t);
+        if (c == null) return;
+        System.out.println(t.generateMarkReport(c).export());
+    }
 
-        Logger.getInstance().log(teacher, "Tried to submit mark " + score + " for student " + studentId + " in course " + courseId);
-        System.out.println("Оценка успешно добавлена в очередь на запись!");
+    private static void writeRecommendation(Teacher t) throws IOException {
+        String studentId = prompt("Student id: ");
+        User u = Database.getInstance().getUsers().get(studentId);
+        if (!(u instanceof Student)) {
+            System.out.println("Not a student.");
+            return;
+        }
+        String content = prompt("Letter content: ");
+        String purpose = prompt("Purpose (e.g. job, exchange): ");
+        var letter = t.writeRecommendation((Student) u, content, purpose);
+        System.out.println("Letter created:");
+        System.out.println(letter.export());
+    }
+
+    private static Course pickCourse(Teacher t) throws IOException {
+        if (t.getCoursesTaught().isEmpty()) {
+            System.out.println("You don't teach any courses yet.");
+            return null;
+        }
+        listCourses(t);
+        String id = prompt("Course id: ");
+        for (Course c : t.getCoursesTaught()) {
+            if (c.getCourseId().equals(id)) return c;
+        }
+        System.out.println("No such course in your list.");
+        return null;
+    }
+
+    private static double parseDouble(String s) {
+        try { return Double.parseDouble(s); }
+        catch (NumberFormatException e) { return 0; }
     }
 }

@@ -1,41 +1,69 @@
 package core.observer;
 
+import models.academic.News;
+
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+/**
+ * NewsService — Singleton + Subject.
+ *
+ * Manages subscriptions and broadcasts NewsEvents to all attached
+ * Observers when a News item is published.
+ */
 public class NewsService implements Subject, Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     private final List<Observer> observers = new ArrayList<>();
-    private final List<String> newsFeed = new ArrayList<>();
+    private final List<News> newsFeed = new ArrayList<>();
 
-    @Override
-    public synchronized void attach(Observer o) {
-        if (!observers.contains(o)) {
-            observers.add(o);
-        }
+    private NewsService() {}
 
+    private static class Holder {
+        private static final NewsService INSTANCE = new NewsService();
+    }
+
+    public static NewsService getInstance() {
+        return Holder.INSTANCE;
+    }
+
+    /**
+     * Publish a news item: store it in the feed and notify all observers.
+     */
+    public void publishNews(News n) {
+        if (n == null) return;
+        newsFeed.add(n);
+        notifyObservers(new NewsEvent(n));
     }
 
     @Override
-    public synchronized void detach(Observer o) {
+    public void attach(Observer o) {
+        if (o == null) return;
+        if (!observers.contains(o)) {
+            observers.add(o);
+        }
+    }
+
+    @Override
+    public void detach(Observer o) {
         observers.remove(o);
     }
 
     @Override
-    public synchronized void notifyObservers(NewsEvent event) {
+    public void notifyObservers(NewsEvent e) {
         for (Observer o : observers) {
-            o.update(event);
+            o.update(e);
         }
     }
 
-    public synchronized void publishNews(String newsContent) {
-        newsFeed.add(newsContent);
-        NewsEvent event = new NewsEvent(newsContent);
-        notifyObservers(event);
+    public List<News> getNewsFeed() {
+        return Collections.unmodifiableList(newsFeed);
     }
 
-    public List<String> getNewsFeed() {
-        return new ArrayList<>(newsFeed);
+    public List<Observer> getObservers() {
+        return Collections.unmodifiableList(observers);
     }
 }

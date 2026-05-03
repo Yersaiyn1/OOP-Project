@@ -1,101 +1,177 @@
 package models.users;
 
+import core.interfaces.Reportable;
+import core.strategy.AcademicReportStrategy;
+import core.strategy.ReportStrategy;
 import models.academic.Course;
+import models.academic.Mark;
 import models.academic.RecommendationLetter;
+import models.academic.Report;
 import models.academic.Transcript;
 import models.enums.Major;
 import models.enums.StudyYear;
+import models.exceptions.CourseFailLimitException;
+import models.exceptions.CreditLimitExceededException;
+import models.exceptions.LowHIndexException;
 import models.research.Researcher;
-import java.io.Serializable;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
-public class Student extends User implements Serializable {
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Student — academic actor with a transcript, courses, and (optionally)
+ * a research supervisor.
+ *
+ * Business rules:
+ *   - max 21 credits per semester              -> CreditLimitExceededException
+ *   - max 3 failed courses                     -> CourseFailLimitException
+ *   - supervisor must have h-index >= 3        -> LowHIndexException
+ */
+public class Student extends User implements Comparable<Student>, Reportable {
+
+    private static final long serialVersionUID = 1L;
+
+    public static final int MAX_CREDITS_PER_SEMESTER = 21;
+    public static final int MAX_FAILED_COURSES       = 3;
+    public static final int MIN_SUPERVISOR_HINDEX    = 3;
+
     private String studentId;
     private Major major;
     private StudyYear year;
-    private List<Course> enrolledCourses;
-    private Transcript transcript;
-    private Researcher supervisor;
-    private List<RecommendationLetter> recommendations;
     private double gpa;
+    private final List<Course> enrolledCourses = new ArrayList<>();
+    private final Transcript transcript;
     private int failedCoursesCount;
+    private Researcher supervisor;
+    private final List<RecommendationLetter> recommendations = new ArrayList<>();
 
-    public Student(String firstName, String lastName, String email, String phone, String password, Major major, StudyYear year) {
-        super(UUID.randomUUID().toString(), firstName, lastName, email, phone, password, LocalDateTime.now());
-        this.studentId = "S" + UUID.randomUUID().toString().substring(0, 7).toUpperCase();
+    public Student(String id, String firstName, String lastName,
+                   String email, String password, String phone,
+                   String studentId, Major major, StudyYear year) {
+        super(id, firstName, lastName, email, password, phone);
+        this.studentId = studentId;
         this.major = major;
         this.year = year;
-        this.enrolledCourses = new ArrayList<>();
-        this.transcript = new Transcript(this);
-        this.recommendations = new ArrayList<>();
         this.gpa = 0.0;
         this.failedCoursesCount = 0;
+        this.transcript = new Transcript(this);
     }
 
-    public String getStudentId() {
-        return studentId;
+    @Override
+    public String getRole() {
+        return "Student";
     }
 
-    public double getGpa() {
-        return transcript.getGpa();
+    /**
+     * Register for a course. Enforces the credit limit and the failed-courses limit.
+     */
+    public void registerForCourse(Course c) {
+        if (c == null) return;
+
+        if (failedCoursesCount >= MAX_FAILED_COURSES) {
+            throw new CourseFailLimitException(getFullName(), failedCoursesCount, MAX_FAILED_COURSES);
+        }
+
+        int currentCredits = getTotalCredits();
+        int newCredits = c.getCredits();
+        if (currentCredits + newCredits > MAX_CREDITS_PER_SEMESTER) {
+            throw new CreditLimitExceededException(currentCredits, newCredits, MAX_CREDITS_PER_SEMESTER);
+        }
+
+        if (!enrolledCourses.contains(c)) {
+            enrolledCourses.add(c);
+            c.enrollStudent(this);
+        }
     }
 
-    public int getFailedCoursesCount() {
-        return failedCoursesCount;
-    }
-
-    public Major getMajor() {
-        return major;
-    }
-
-    public StudyYear getYear() {
-        return year;
-    }
-
-    public List<Course> getEnrolledCourses() {
-        return enrolledCourses;
+    /**
+     * Read-only view of the student's marks (one per registered course).
+     */
+    public List<Mark> viewMarks() {
+        return new ArrayList<>(transcript.getMarks().values());
     }
 
     public Transcript getTranscript() {
         return transcript;
     }
 
-    public Researcher getSupervisor() {
-        return supervisor;
+    /**
+     * Rate a teacher (0..5). Updates the teacher's running average.
+     */
+    public void rateTeacher(Teacher t, double rating) {
+        if (t == null) return;
+        if (rating < 0 || rating > 5) {
+            throw new IllegalArgumentException("Rating must be in [0..5]");
+        }
+        t.receiveRating(rating);
+    }
+
+    /**
+     * Sum of credits across currently-enrolled courses.
+     */
+    public int getTotalCredits() {
+        int total = 0;
+        for (Course c : enrolledCourses) {
+            total += c.getCredits();
+        }
+        return total;
+    }
+
+    /**
+     * Assign a research supervisor. The candidate must have h-index >= 3.
+     */
+    public void assignSupervisor(Researcher r) {
+        if (r == null) {
+            throw new IllegalArgumentException("Supervisor cannot be null");
+        }
+        if (r.getHIndex() < MIN_SUPERVISOR_HINDEX) {
+            String name = (r instanceof models.research.ResearcherDecorator)
+                    ? ((models.research.ResearcherDecorator) r).getWrappedUser().getFullName()
+                    : "researcher";
+            throw new LowHIndexException(name, r.getHIndex(), MIN_SUPERVISOR_HINDEX);
+        }
+        this.supervisor = r;
     }
 
     public List<RecommendationLetter> getRecommendations() {
         return recommendations;
     }
 
-    public void setMajor(Major major) {
-        this.major = major;
-    }
-
-    public void setYear(StudyYear year) {
-        this.year = year;
-    }
-
-    public void registerForCourse(Course course) {
-        if (course != null && !enrolledCourses.contains(course)) {
-            enrolledCourses.add(course);
-        }
-    }
-
-    public void assignSupervisor(Researcher supervisor) {
-        this.supervisor = supervisor;
-    }
-
-    public void incrementFailedCoursesCount() {
-        this.failedCoursesCount++;
-    }
-
     public void addRecommendation(RecommendationLetter letter) {
-        if (letter != null) {
-            this.recommendations.add(letter);
-        }
+        if (letter != null) recommendations.add(letter);
     }
+
+    /**
+     * Default ordering: by GPA descending. Demonstrates Comparable.
+     */
+    @Override
+    public int compareTo(Student o) {
+        if (o == null) return -1;
+        return Double.compare(o.gpa, this.gpa);
+    }
+
+    @Override
+    public Report generateReport() {
+        ReportStrategy s = new AcademicReportStrategy();
+        Map<String, Object> data = new HashMap<>();
+        data.put("student", this);
+        data.put("transcript", transcript);
+        return s.build(data);
+    }
+
+    public String getStudentId()             { return studentId; }
+    public Major getMajor()                  { return major; }
+    public StudyYear getYear()               { return year; }
+    public double getGpa()                   { return gpa; }
+    public List<Course> getEnrolledCourses() { return enrolledCourses; }
+    public int getFailedCoursesCount()       { return failedCoursesCount; }
+    public Researcher getSupervisor()        { return supervisor; }
+
+    public void setMajor(Major major)              { this.major = major; }
+    public void setYear(StudyYear year)            { this.year = year; }
+    public void setGpa(double gpa)                 { this.gpa = gpa; }
+    public void setFailedCoursesCount(int count)   { this.failedCoursesCount = count; }
+    public void incrementFailedCourses()           { this.failedCoursesCount++; }
 }

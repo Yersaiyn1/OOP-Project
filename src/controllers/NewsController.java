@@ -1,38 +1,81 @@
 package controllers;
 
+import core.AuthService;
 import core.Logger;
-import core.observer.NewsEvent;
 import core.observer.NewsService;
+import data.Database;
 import models.academic.News;
+import models.users.Manager;
 import models.users.User;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NewsController implements Serializable {
-    private static final long serialVersionUID = 1L;
+/**
+ * Controller for news publishing and feed access.
+ */
+public final class NewsController {
 
-    // Создаем единственный экземпляр NewsService, чтобы вызывать методы корректно
-    private static final NewsService newsService = new NewsService();
-    private static final List<News> newsList = new ArrayList<>();
+    private NewsController() {}
 
-    public static void addNews(User user, String title, String body) {
-        News news = new News(title, body);
-        newsList.add(news);
-
-        // Логирование действия. Передаем user, если он есть, иначе используем строку
-        if (user != null) {
-            Logger.getInstance().log(user, "Created news: " + title);
-        } else {
-            Logger.getInstance().log(new models.users.Teacher("temp", "System", "Admin", "sys@mail.ru", "pass", "123", 0.0, java.time.LocalDate.now(), "Admin"), "Created news: " + title);
+    /**
+     * Publish a news item. Managers only.
+     */
+    public static boolean publish(News n) {
+        User current = AuthService.getInstance().getCurrentUser();
+        if (!(current instanceof Manager)) {
+            System.out.println("[news] only managers can publish news");
+            return false;
         }
-
-        // Публикуем новость через наш экземпляр NewsService
-        newsService.publishNews(news.toString());
+        if (n == null) return false;
+        ((Manager) current).manageNews(n);
+        Logger.getInstance().log(current, "published news '" + n.getTitle() + "'");
+        return true;
     }
 
-    public static List<News> getAllNews() {
-        return new ArrayList<>(newsList);
+    /**
+     * Get the full news feed (any logged-in user).
+     */
+    public static List<News> getFeed() {
+        if (!AuthService.getInstance().isLoggedIn()) {
+            return new ArrayList<>();
+        }
+        return NewsService.getInstance().getNewsFeed();
+    }
+
+    /**
+     * Subscribe the current user to news updates.
+     */
+    public static boolean subscribe() {
+        User current = AuthService.getInstance().getCurrentUser();
+        if (current == null) {
+            System.out.println("[news] login required");
+            return false;
+        }
+        NewsService.getInstance().attach(current);
+        Logger.getInstance().log(current, "subscribed to news");
+        return true;
+    }
+
+    /**
+     * Unsubscribe the current user.
+     */
+    public static boolean unsubscribe() {
+        User current = AuthService.getInstance().getCurrentUser();
+        if (current == null) return false;
+        NewsService.getInstance().detach(current);
+        Logger.getInstance().log(current, "unsubscribed from news");
+        return true;
+    }
+
+    /**
+     * Database lookup of stored news (used by AdminView/managers).
+     */
+    public static List<News> listAllStored() {
+        List<News> out = new ArrayList<>();
+        for (Object v : Database.getInstance().getNews().values()) {
+            if (v instanceof News) out.add((News) v);
+        }
+        return out;
     }
 }

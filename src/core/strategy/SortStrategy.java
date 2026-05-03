@@ -1,7 +1,15 @@
 package core.strategy;
 
+import models.research.ResearchPaper;
+
+import java.io.Serializable;
 import java.util.List;
 
-public interface SortStrategy<T> {
-    void sort(List<T> items);
+/**
+ * Strategy interface for sorting research papers.
+ * Returns a NEW sorted list (does not mutate the input).
+ */
+public interface SortStrategy extends Serializable {
+
+    List<ResearchPaper> sort(List<ResearchPaper> items);
 }

@@ -1,39 +1,112 @@
 package models.users;
 
-import models.enums.ManagerType;
+import core.observer.NewsService;
+import data.Database;
+import models.academic.Course;
+import models.academic.News;
+import models.academic.Report;
 import models.academic.Request;
-import java.io.Serializable;
+import models.enums.Major;
+import models.enums.ManagerType;
+import models.enums.RequestStatus;
+import models.enums.StudyYear;
+
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
-public class Manager extends Employee implements Serializable {
+/**
+ * Manager — handles requests, course catalog, teacher assignments, news.
+ */
+public class Manager extends Employee {
+
+    private static final long serialVersionUID = 1L;
+
     private ManagerType type;
-    private List<Request> managedRequests;
+    private final List<Request> managedRequests = new ArrayList<>();
 
-    public Manager(String firstName, String lastName, String email, String phone, String password, double salary, LocalDate hireDate, String department, ManagerType type) {
-        super(UUID.randomUUID().toString(), firstName, lastName, email, phone, password, LocalDateTime.now(), salary, hireDate, department);
-        this.type = type;
-        this.managedRequests = new ArrayList<>();
-    }
-
-    public ManagerType getType() {
-        return type;
-    }
-
-    public List<Request> getManagedRequests() {
-        return managedRequests;
-    }
-
-    public void setType(ManagerType type) {
+    public Manager(String id, String firstName, String lastName,
+                   String email, String password, String phone,
+                   double salary, LocalDate hireDate, String department,
+                   ManagerType type) {
+        super(id, firstName, lastName, email, password, phone,
+                salary, hireDate, department);
         this.type = type;
     }
 
-    public void addManagedRequest(Request request) {
-        if (request != null && !managedRequests.contains(request)) {
-            managedRequests.add(request);
+    @Override
+    public String getRole() {
+        return "Manager";
+    }
+
+    /**
+     * Approve a course registration request.
+     */
+    public void approveRegistration(Request r) {
+        if (r == null) return;
+        r.setStatus(RequestStatus.APPROVED);
+        if (!managedRequests.contains(r)) {
+            managedRequests.add(r);
         }
     }
+
+    public void rejectRegistration(Request r) {
+        if (r == null) return;
+        r.setStatus(RequestStatus.REJECTED);
+        if (!managedRequests.contains(r)) {
+            managedRequests.add(r);
+        }
+    }
+
+    /**
+     * Open a course up for registration by setting its target major and year
+     * and storing it in the central catalog.
+     */
+    public void addCourseForRegistration(Course c, Major m, StudyYear y) {
+        if (c == null) return;
+        c.setTargetMajor(m);
+        c.setTargetYear(y);
+        Database.getInstance().getCourses().put(c.getCourseId(), c);
+    }
+
+    /**
+     * Assign a teacher to a course.
+     */
+    public void assignCourse(Teacher t, Course c) {
+        if (t == null || c == null) return;
+        t.manageCourse(c);
+    }
+
+    /**
+     * Generate an academic report (placeholder — managers may extend this
+     * with school-wide statistics).
+     */
+    public Report generateAcademicReport() {
+        Report r = new Report("Academic Report — " + getDepartment());
+        r.put("manager", getFullName());
+        r.put("courses", Database.getInstance().getCourses().size());
+        r.put("students", countStudents());
+        return r;
+    }
+
+    /**
+     * Publish a piece of news through NewsService.
+     */
+    public void manageNews(News n) {
+        if (n == null) return;
+        Database.getInstance().getNews().put(n.getNewsId(), n);
+        NewsService.getInstance().publishNews(n);
+    }
+
+    private int countStudents() {
+        int n = 0;
+        for (User u : Database.getInstance().getUsers().values()) {
+            if (u instanceof Student) n++;
+        }
+        return n;
+    }
+
+    public ManagerType getType()                    { return type; }
+    public List<Request> getManagedRequests()       { return managedRequests; }
+    public void setType(ManagerType type)           { this.type = type; }
 }

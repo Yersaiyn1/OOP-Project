@@ -5,35 +5,35 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NewsService implements Subject, Serializable {
-    private List<Observer> observers = new ArrayList<>();
-    private List<String> newsFeed = new ArrayList<>();
+    private final List<Observer> observers = new ArrayList<>();
+    private final List<String> newsFeed = new ArrayList<>();
 
     @Override
-    public void attach(Observer o) {
+    public synchronized void attach(Observer o) {
         if (!observers.contains(o)) {
             observers.add(o);
         }
     }
 
     @Override
-    public void detach(Observer o) {
+    public synchronized void detach(Observer o) {
         observers.remove(o);
     }
 
     @Override
-    public void notifyObservers(NewsEvent event) {
+    public synchronized void notifyObservers(NewsEvent event) {
         for (Observer o : observers) {
             o.update(event);
         }
     }
 
-    public void publishNews(String newsContent) {
+    public synchronized void publishNews(String newsContent) {
         newsFeed.add(newsContent);
         NewsEvent event = new NewsEvent(newsContent);
         notifyObservers(event);
     }
 
     public List<String> getNewsFeed() {
-        return newsFeed;
+        return new ArrayList<>(newsFeed);
     }
 }

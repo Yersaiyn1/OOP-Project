@@ -2,26 +2,32 @@ package views;
 
 import core.Logger;
 import models.users.Teacher;
-import strategies.DefaultReportGenerationStrategy;
-import strategies.TeacherReportStrategy;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 
-public class TeacherView extends BaseView implements Serializable {
+/**
+ * Класс TeacherView для отображения меню действий преподавателя.
+ */
+public class TeacherView implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private static final BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
+    /**
+     * Отображает главное меню преподавателя.
+     *
+     * @param teacher Текущий преподаватель
+     * @throws IOException В случае ошибок ввода-вывода
+     */
     public static void showMenu(Teacher teacher) throws IOException {
         if (teacher == null) {
             System.out.println("Ошибка: Преподаватель не найден.");
             return;
         }
 
-        TeacherReportStrategy reportStrategy = new DefaultReportGenerationStrategy();
         boolean exit = false;
 
         System.out.println("\n====================================");
@@ -45,7 +51,7 @@ public class TeacherView extends BaseView implements Serializable {
                     viewCourses(teacher);
                     break;
                 case "2":
-                    processReports(teacher, reportStrategy);
+                    processReports(teacher);
                     break;
                 case "3":
                     viewPapers(teacher);
@@ -76,9 +82,18 @@ public class TeacherView extends BaseView implements Serializable {
         }
     }
 
-    private static void processReports(Teacher teacher, TeacherReportStrategy strategy) {
+    private static void processReports(Teacher teacher) {
         System.out.println("\n--- Обработка отчетов ---");
-        strategy.processReports(teacher, teacher.getReports());
+        if (teacher.getReports().isEmpty()) {
+            System.out.println("У вас нет отчетов для обработки.");
+        } else {
+            teacher.getReports().forEach(r -> {
+                System.out.println("ID отчета: " + r.getReportId());
+                System.out.println("Содержимое: " + r.getContent());
+                System.out.println("Дата создания: " + r.getCreatedAt());
+                System.out.println("---------------------------------");
+            });
+        }
     }
 
     private static void viewPapers(Teacher teacher) {

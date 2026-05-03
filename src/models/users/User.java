@@ -31,21 +31,14 @@ public abstract class User implements Observer, Serializable {
         this.createdAt = LocalDateTime.now();
     }
 
-    // ----- core behaviour -----
 
-    /**
-     * verify a password attempt against the stored password.
-     * plain string compare — fine for an academic project; in real life
-     * you'd use a salted hash.
-     */
+
+
     public boolean authenticate(String pwd) {
         return this.password != null && this.password.equals(pwd);
     }
 
-    /**
-      send a message to another user, in this offline implementation
-      we simply print to the console and let logger record the action.
-     */
+
     public void sendMessage(User to, String msg) {
         if (to == null || msg == null) return;
         System.out.printf("[message] %s -> %s: %s%n",

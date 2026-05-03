@@ -6,50 +6,96 @@ import models.academic.Transcript;
 import models.enums.Major;
 import models.enums.StudyYear;
 import models.research.Researcher;
-
+import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
-public class Student extends User {
+public class Student extends User implements Serializable {
     private String studentId;
     private Major major;
     private StudyYear year;
-    private double gpa;
-    private int failedCoursesCount;
     private List<Course> enrolledCourses;
     private Transcript transcript;
     private Researcher supervisor;
-    private List<RecommendationLetter> recommendations; // BONUS
+    private List<RecommendationLetter> recommendations;
+    private double gpa;
+    private int failedCoursesCount;
 
-    public Student(String studentId) {
-        this.studentId = studentId;
+    public Student(String firstName, String lastName, String email, String phone, String password, Major major, StudyYear year) {
+        super(UUID.randomUUID().toString(), firstName, lastName, email, phone, password, LocalDateTime.now());
+        this.studentId = "S" + UUID.randomUUID().toString().substring(0, 7).toUpperCase();
+        this.major = major;
+        this.year = year;
         this.enrolledCourses = new ArrayList<>();
-        this.transcript = new Transcript();
+        this.transcript = new Transcript(this);
         this.recommendations = new ArrayList<>();
+        this.gpa = 0.0;
+        this.failedCoursesCount = 0;
     }
 
-    // Read-only
-    public String getStudentId() { return studentId; }
-    public double getGpa() { return gpa; }
-    public int getFailedCoursesCount() { return failedCoursesCount; }
+    public String getStudentId() {
+        return studentId;
+    }
 
-    // Standard
-    public Major getMajor() { return major; }
-    public void setMajor(Major major) { this.major = major; }
+    public double getGpa() {
+        return transcript.getGpa();
+    }
 
-    public StudyYear getYear() { return year; }
-    public void setYear(StudyYear year) { this.year = year; }
+    public int getFailedCoursesCount() {
+        return failedCoursesCount;
+    }
 
-    public List<Course> getEnrolledCourses() { return enrolledCourses; }
-    // No setter — managed via registerForCourse()
+    public Major getMajor() {
+        return major;
+    }
 
-    public Transcript getTranscript() { return transcript; }
-    // No public setter — created in constructor
+    public StudyYear getYear() {
+        return year;
+    }
 
-    public Researcher getSupervisor() { return supervisor; }
-    // No setter — use assignSupervisor() (validates h-index)
+    public List<Course> getEnrolledCourses() {
+        return enrolledCourses;
+    }
+
+    public Transcript getTranscript() {
+        return transcript;
+    }
+
+    public Researcher getSupervisor() {
+        return supervisor;
+    }
 
     public List<RecommendationLetter> getRecommendations() {
         return recommendations;
-    } // BONUS
+    }
+
+    public void setMajor(Major major) {
+        this.major = major;
+    }
+
+    public void setYear(StudyYear year) {
+        this.year = year;
+    }
+
+    public void registerForCourse(Course course) {
+        if (course != null && !enrolledCourses.contains(course)) {
+            enrolledCourses.add(course);
+        }
+    }
+
+    public void assignSupervisor(Researcher supervisor) {
+        this.supervisor = supervisor;
+    }
+
+    public void incrementFailedCoursesCount() {
+        this.failedCoursesCount++;
+    }
+
+    public void addRecommendation(RecommendationLetter letter) {
+        if (letter != null) {
+            this.recommendations.add(letter);
+        }
+    }
 }

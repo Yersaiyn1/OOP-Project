@@ -1,6 +1,7 @@
 package data;
 
 import core.Logger;
+import models.academic.Course; // Import Course
 import models.users.User;
 
 import java.io.FileInputStream;
@@ -11,40 +12,23 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection; // Import Collection
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors; // Import Collectors
 
-/**
- * Singleton Database.
- *
- * In-memory store for every persistent object: users, courses, papers,
- * projects, news, requests + the audit log. Persists to {@code db.dat}
- * via Java serialization.
- *
- * The maps use generic Object values so other teammates' classes
- * (Course, ResearchPaper, ResearchProject, News, Request) can be added
- * without forcing this file to import them. Concrete code typically
- * casts on read, which is fine because keys are typed.
- *
- * Usage:
- *   Database.getInstance().getUsers().put(user.getId(), user);
- *   Database.getInstance().save();
- *   ...
- *   Database.getInstance().load();
- */
 public class Database implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private static final String DB_FILE = "db.dat";
 
-    // --- collections ---
     private final Map<String, User>   users    = new HashMap<>();
-    private final Map<String, Object> courses  = new HashMap<>();   // <courseId, Course>
-    private final Map<String, Object> papers   = new HashMap<>();   // <doi, ResearchPaper>
-    private final Map<String, Object> projects = new HashMap<>();   // <projectId, ResearchProject>
-    private final Map<String, Object> news     = new HashMap<>();   // <newsId, News>
-    private final Map<String, Object> requests = new HashMap<>();   // <requestId, Request>
+    private final Map<String, Object> courses  = new HashMap<>();
+    private final Map<String, Object> papers   = new HashMap<>();
+    private final Map<String, Object> projects = new HashMap<>();
+    private final Map<String, Object> news     = new HashMap<>();
+    private final Map<String, Object> requests = new HashMap<>();
     private final List<LogEntry>      logs     = new ArrayList<>();
 
     private Database() {}
@@ -64,15 +48,41 @@ public class Database implements Serializable {
     public Map<String, Object> getRequests() { return requests; }
     public List<LogEntry>      getLogs()     { return logs; }
 
+    // --- New methods for controllers ---
+
+    public User getUserById(String id) {
+        return users.get(id);
+    }
+
+    public Course getCourseById(String courseId) {
+        Object course = courses.get(courseId);
+        if (course instanceof Course) {
+            return (Course) course;
+        }
+        return null;
+    }
+
+    public void addCourse(Course course) {
+        if (course != null) {
+            courses.put(course.getCourseId(), course);
+        }
+    }
+
+    public boolean removeCourse(String courseId) {
+        return courses.remove(courseId) != null;
+    }
+
+    public List<Course> getAllCourses() {
+        return courses.values().stream()
+                .filter(obj -> obj instanceof Course)
+                .map(obj -> (Course) obj)
+                .collect(Collectors.toList());
+    }
+
     // --- persistence ---
 
-    /**
-     * Serialize the whole database to {@value #DB_FILE} in the current
-     * working directory.
-     */
     public void save() {
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(DB_FILE))) {
-            // sync logs from Logger before saving
             this.logs.clear();
             this.logs.addAll(Logger.getInstance().getLogs());
             out.writeObject(this);
@@ -82,15 +92,10 @@ public class Database implements Serializable {
         }
     }
 
-    /**
-     * Load database state from {@value #DB_FILE} if the file exists.
-     * On success, replaces the singleton instance.
-     */
     public void load() {
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(DB_FILE))) {
             Database restored = (Database) in.readObject();
             INSTANCE = restored;
-            // restore Logger view
             Logger.getInstance().replaceLogs(restored.getLogs());
             System.out.println("[db] loaded from " + DB_FILE);
         } catch (FileNotFoundException e) {

@@ -24,9 +24,17 @@ public class LogEntry implements Serializable {
         this.action = action;
     }
 
-    public LocalDateTime getTimestamp() { return timestamp; }
-    public User getUser()               { return user; }
-    public String getAction()           { return action; }
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public String getAction() {
+        return action;
+    }
 
     @Override
     public String toString() {

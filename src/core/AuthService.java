@@ -7,13 +7,13 @@ import models.users.User;
 import java.io.Serializable;
 
 /**
- * Singleton AuthService.
- *
- * Holds the currently logged-in User. Every controller that mutates
- * data must check {@link #getCurrentUser()} != null first; if it is
- * null, the call should be rejected.
- *
- * Throws {@link AuthenticationException} on bad credentials.
+ - Singleton AuthService.
+
+ - Holds the currently logged-in User. Every controller that mutates
+ - data must check {@link #getCurrentUser()} != null first; if it is
+ - null, the call should be rejected.
+
+ - Throws {@link AuthenticationException} on bad credentials.
  */
 public class AuthService implements Serializable {
 
@@ -32,12 +32,12 @@ public class AuthService implements Serializable {
     }
 
     /**
-     * Authenticate a user by email + password.
-     *
-     * Searches Database.users for a matching email, verifies password.
-     *
-     * @return the logged-in User on success
-     * @throws AuthenticationException if no user matches or password is wrong
+     - Authenticate a user by email + password.
+
+     - Searches Database.users for a matching email, verifies password.
+
+     - @return the logged-in User on success
+     - @throws AuthenticationException if no user matches or password is wrong
      */
     public User login(String email, String pwd) {
         if (email == null || pwd == null) {

@@ -8,10 +8,10 @@ import java.util.List;
 
 /**
  * Admin — system administrator.
- *
+
  * Per the diagram: addUser, removeUser, updateUser, viewLogs.
  * The diagram also gives Admin an accessLevel (1..N).
- *
+
  * Admin has direct access to Database (this is the only class outside
  * the data layer that does so on purpose — admins manage everything).
  */
@@ -36,7 +36,7 @@ public class Admin extends Employee {
     }
 
     /**
-     * Register a new user in the system.
+      - Register a new user in the system.
      */
     public void addUser(User u) {
         if (u == null) return;
@@ -44,7 +44,7 @@ public class Admin extends Employee {
     }
 
     /**
-     * Remove a user by id.
+      - Remove a user by id.
      */
     public void removeUser(User u) {
         if (u == null) return;
@@ -52,8 +52,8 @@ public class Admin extends Employee {
     }
 
     /**
-     * Replace an existing user record (matched by id).
-     * No-op if the id is not in the database.
+     - Replace an existing user record (matched by id).
+     - No-op if the id is not in the database.
      */
     public void updateUser(User u) {
         if (u == null) return;
@@ -63,12 +63,18 @@ public class Admin extends Employee {
     }
 
     /**
-     * Read-only view of the system audit log.
+     - Read-only view of the system audit log.
      */
     public List<LogEntry> viewLogs() {
         return Database.getInstance().getLogs();
     }
 
-    public int getAccessLevel() { return accessLevel; }
-    public void setAccessLevel(int accessLevel) { this.accessLevel = accessLevel; }
+    public void setAccessLevel(int accessLevel) {
+        this.accessLevel = accessLevel;
+    }
+
+    public int getAccessLevel() {
+        return accessLevel;
+    }
+
 }

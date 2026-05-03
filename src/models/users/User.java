@@ -7,13 +7,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-/**
- * Abstract base class for every user in the system.
- *
- * Implements Observer so any user can subscribe to NewsService and
- * receive {@link NewsEvent} updates.
- * Implements Serializable so users can be persisted by Database.
- */
+
 public abstract class User implements Observer, Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -40,8 +34,8 @@ public abstract class User implements Observer, Serializable {
     // ----- core behaviour -----
 
     /**
-     * Verify a password attempt against the stored password.
-     * Plain string compare — fine for an academic project; in real life
+     * verify a password attempt against the stored password.
+     * plain string compare — fine for an academic project; in real life
      * you'd use a salted hash.
      */
     public boolean authenticate(String pwd) {
@@ -49,8 +43,8 @@ public abstract class User implements Observer, Serializable {
     }
 
     /**
-     * Send a message to another user. In this offline implementation
-     * we simply print to the console and let Logger record the action.
+      send a message to another user, in this offline implementation
+      we simply print to the console and let logger record the action.
      */
     public void sendMessage(User to, String msg) {
         if (to == null || msg == null) return;
@@ -58,46 +52,66 @@ public abstract class User implements Observer, Serializable {
                 this.getFullName(), to.getFullName(), msg);
     }
 
-    /**
-     * Each concrete subclass returns its role name
-     * ("Student", "Teacher", "Manager", "Admin").
-     */
+
     public abstract String getRole();
 
     // ----- Observer -----
 
-    /**
-     * Default reaction to a news event: print it. Subclasses may override
-     * (e.g. Student could log it differently).
-     */
     @Override
     public void update(NewsEvent event) {
         if (event == null || event.getNews() == null) return;
         System.out.printf("[news -> %s] %s%n",
-                this.getFullName(), event.getNews().getTitle());
+                this.getFullName(), event.getNews()); //event.getNews().getTitle() mb?
     }
 
-    // ----- getters / setters -----
+    // setters
 
-    public String getId()        { return id; }
-    public String getFirstName() { return firstName; }
-    public String getLastName()  { return lastName; }
-    public String getEmail()     { return email; }
-    public String getPhone()     { return phone; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setFirstName(String firstName){
+        this.firstName = firstName;
+    }
+    public void setLastName(String lastName){
+        this.lastName = lastName;
+    }
+    public void setEmail(String email){
+        this.email = email;
+    }
+    public void setPassword(String password){
+        this.password = password;
+    }
+    public void setPhone(String phone){
+        this.phone = phone;
+    }
 
-    public void setFirstName(String firstName) { this.firstName = firstName; }
-    public void setLastName(String lastName)   { this.lastName = lastName; }
-    public void setEmail(String email)         { this.email = email; }
-    public void setPassword(String password)   { this.password = password; }
-    public void setPhone(String phone)         { this.phone = phone; }
+    //  getters
+
+    public String getId(){
+        return id;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName(){
+        return lastName;
+    }
+
+    public String getEmail(){
+        return email;
+    }
+
+    public String getPhone(){
+        return phone;
+    }
+
+    public LocalDateTime getCreatedAt(){
+        return createdAt;
+    }
+
 
     public String getFullName() {
         return firstName + " " + lastName;
     }
-
-    // ----- equals / hashCode / toString -----
-    // Identity by id (unique) — required by the diagram and used by Database maps.
 
     @Override
     public boolean equals(Object o) {

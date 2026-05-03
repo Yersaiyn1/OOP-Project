@@ -21,24 +21,24 @@ public interface Researcher extends Serializable {
     List<ResearchPaper> getPapers();
 
     /**
-     * @return research projects this researcher participates in.
+     - @return research projects this researcher participates in.
      */
     List<ResearchProject> getProjects();
 
     /**
-     * Add a paper to this researcher's publication record.
+     - Add a paper to this researcher's publication record.
      */
     void addPaper(ResearchPaper paper);
 
     /**
-     * Join a research project. The project will add this researcher to its
-     * participants list.
+     - Join a research project. The project will add this researcher to its
+     - participants list.
      */
     void joinProject(ResearchProject project);
 
     /**
-     * Print all papers, sorted by the given Comparator
-     * (used by SortStrategy implementations).
+     - Print all papers, sorted by the given Comparator
+     - (used by SortStrategy implementations).
      */
     void printPapers(Comparator<ResearchPaper> comparator);
 }

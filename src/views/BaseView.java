@@ -3,32 +3,58 @@ package views;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 
+/**
+ * BaseView — shared input/output helpers for every console view.
+ *
+ * Per project conventions:
+ *  - all view methods are static
+ *  - all views extend BaseView
+ *  - all views share this BufferedReader (don't open another one)
+ *  - view methods declare {@code throws IOException}
+ *
+ * Subclasses do not need to override anything; they reuse {@link #IN}
+ * and {@link #prompt} / {@link #separator}.
+ */
 public abstract class BaseView {
-    protected static BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-    protected static PrintWriter writer = new PrintWriter(System.out, true);
 
-    private BaseView() {
+    /** Shared input stream — do NOT close it; closing System.in breaks subsequent views. */
+    protected static final BufferedReader IN =
+            new BufferedReader(new InputStreamReader(System.in));
+
+    /**
+     * Print a prompt and return the user's trimmed reply.
+     */
+    protected static String prompt(String message) throws IOException {
+        System.out.print(message);
+        String line = IN.readLine();
+        return (line == null) ? "" : line.trim();
     }
 
-    protected static String readLine() throws IOException {
-        return reader.readLine();
+    /**
+     * Print a divider line for visual separation.
+     */
+    protected static void separator() {
+        System.out.println("------------------------------------------------------------");
     }
 
-    protected static int readInt() throws IOException, NumberFormatException {
-        return Integer.parseInt(reader.readLine());
+    /**
+     * Print a heading bracketed by separators.
+     */
+    protected static void heading(String title) {
+        separator();
+        System.out.println("  " + title);
+        separator();
     }
 
-    protected static void print(String message) {
-        writer.print(message);
-    }
-
-    protected static void println(String message) {
-        writer.println(message);
-    }
-
-    protected static void printf(String format, Object... args) {
-        writer.printf(format, args);
+    /**
+     * Try to parse an int; on failure return the supplied fallback.
+     */
+    protected static int parseIntOr(String s, int fallback) {
+        try {
+            return Integer.parseInt(s);
+        } catch (NumberFormatException e) {
+            return fallback;
+        }
     }
 }

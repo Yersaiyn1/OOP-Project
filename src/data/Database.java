@@ -4,6 +4,8 @@ import core.Logger;
 import models.academic.Course;
 import models.users.User;
 
+import models.research.Researcher;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -29,6 +31,7 @@ public class Database implements Serializable {
     private final Map<String, Object> news     = new HashMap<>();
     private final Map<String, Object> requests = new HashMap<>();
     private final List<LogEntry>      logs     = new ArrayList<>();
+    private Map<String, Object>       researchers = new HashMap<>();
 
     private Database() {}
 
@@ -94,6 +97,23 @@ public class Database implements Serializable {
                 .filter(obj -> obj instanceof Course)
                 .map(obj -> (Course) obj)
                 .collect(Collectors.toList());
+    }
+
+    public Researcher getResearcherByUserId(String userId) {
+        Object r = researchers == null ? null : researchers.get(userId);
+        return (r instanceof Researcher) ? (Researcher) r : null;
+    }
+
+    public void addResearcher(String userId, Researcher r) {
+        if (userId != null && r != null) {
+            if (researchers == null) researchers = new HashMap<>();
+            researchers.put(userId, r);
+        }
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        if (researchers == null) researchers = new HashMap<>();
     }
 
     public void save() {

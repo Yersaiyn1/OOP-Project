@@ -4,13 +4,18 @@ import controllers.CourseController;
 import controllers.EnrollmentController;
 import controllers.MarkController;
 import controllers.NewsController;
+import data.Database;
 import models.academic.Course;
 import models.academic.Mark;
 import models.academic.News;
 import models.academic.RecommendationLetter;
+import models.research.ResearchPaper;
+import models.research.Researcher;
+import models.research.StudentResearcher;
 import models.users.Student;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
@@ -31,6 +36,7 @@ public class StudentView extends BaseView {
             System.out.println("5) View news feed");
             System.out.println("6) Subscribe to news");
             System.out.println("7) View my recommendation letters");
+            System.out.println("8) Research");
             System.out.println("0) Logout");
             String choice = prompt("> ");
 
@@ -42,6 +48,7 @@ public class StudentView extends BaseView {
                 case "5": viewNews(); break;
                 case "6": NewsController.subscribe(); break;
                 case "7": viewRecommendations(student); break;
+                case "8": research(student); break;
                 case "0": return;
                 default:  System.out.println("Unknown option.");
             }
@@ -108,6 +115,73 @@ public class StudentView extends BaseView {
             System.out.println();
             System.out.println(letter.export());
         }
+    }
+
+    private static void research(Student s) throws IOException {
+        Researcher r = Database.getInstance().getResearcherByUserId(s.getId());
+        if (r == null) {
+            System.out.println("You are not registered as a researcher.");
+            String yn = prompt("Become a student researcher? (y/n): ");
+            if (!"y".equalsIgnoreCase(yn.trim())) return;
+            String topic = prompt("Thesis topic: ");
+            StudentResearcher sr = new StudentResearcher(s, topic);
+            Database.getInstance().addResearcher(s.getId(), sr);
+            r = sr;
+            System.out.println("Registered as student researcher.");
+        }
+        while (true) {
+            System.out.println("-- RESEARCH (h-index: " + r.getHIndex() + ") --");
+            System.out.println("1) View my papers");
+            System.out.println("2) Add paper");
+            if (r instanceof StudentResearcher) {
+                System.out.println("3) Submit thesis");
+            }
+            System.out.println("0) Back");
+            String c = prompt("> ");
+            switch (c) {
+                case "1": listPapers(r);               break;
+                case "2": addPaper(r, s.getFullName()); break;
+                case "3":
+                    if (r instanceof StudentResearcher) {
+                        ((StudentResearcher) r).submitThesis();
+                    }
+                    break;
+                case "0": return;
+                default: System.out.println("Unknown option.");
+            }
+        }
+    }
+
+    private static void listPapers(Researcher r) {
+        if (r.getPapers().isEmpty()) {
+            System.out.println("No papers yet.");
+            return;
+        }
+        System.out.println("Papers:");
+        for (ResearchPaper p : r.getPapers()) {
+            System.out.println("  " + p);
+        }
+    }
+
+    private static void addPaper(Researcher r, String authorName) throws IOException {
+        String doi       = prompt("DOI: ");
+        String title     = prompt("Title: ");
+        String journal   = prompt("Journal: ");
+        int pages        = parseInt(prompt("Pages: "));
+        int year         = parseInt(prompt("Year (YYYY): "));
+        int citations    = parseInt(prompt("Citations: "));
+        ResearchPaper paper = new ResearchPaper(doi, title, journal, pages,
+                LocalDate.of(year == 0 ? LocalDate.now().getYear() : year, 1, 1));
+        paper.addAuthor(authorName);
+        paper.setCitations(citations);
+        r.addPaper(paper);
+        Database.getInstance().getPapers().put(doi, paper);
+        System.out.println("Paper added. h-index now: " + r.getHIndex());
+    }
+
+    private static int parseInt(String s) {
+        try { return Integer.parseInt(s.trim()); }
+        catch (NumberFormatException e) { return 0; }
     }
 
 }

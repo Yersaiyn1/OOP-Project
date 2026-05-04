@@ -20,6 +20,7 @@ import models.users.Admin;
 import models.users.Teacher;
 import models.users.User;
 import models.academic.RecommendationLetter;
+import models.research.TeacherResearcher;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -166,9 +167,10 @@ public class AdminView extends BaseView {
         admin.addUser(created);
         System.out.println("Added: " + created);
 
-        // Show that PROFESSOR was auto-wrapped into TeacherResearcher
         if (created instanceof Teacher && ((Teacher) created).isProfessor()) {
-            System.out.println("(Decorator) Professor auto-wrapped as TeacherResearcher.");
+            TeacherResearcher tr = new TeacherResearcher(created);
+            Database.getInstance().addResearcher(created.getId(), tr);
+            System.out.println("(Decorator) Professor registered as TeacherResearcher.");
         }
     }
 

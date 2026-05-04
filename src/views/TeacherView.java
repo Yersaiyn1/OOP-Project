@@ -3,11 +3,15 @@ package views;
 import controllers.MarkController;
 import data.Database;
 import models.academic.Course;
+import models.research.ResearchPaper;
+import models.research.Researcher;
+import models.research.TeacherResearcher;
 import models.users.Student;
 import models.users.Teacher;
 import models.users.User;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -26,6 +30,7 @@ public class TeacherView extends BaseView {
             System.out.println("4) Take attendance for a course");
             System.out.println("5) Generate mark report");
             System.out.println("6) Write recommendation");
+            System.out.println("7) Research");
             System.out.println("0) Logout");
             String choice = prompt("> ");
 
@@ -36,6 +41,7 @@ public class TeacherView extends BaseView {
                 case "4": takeAttendance(teacher);         break;
                 case "5": markReport(teacher);             break;
                 case "6": writeRecommendation(teacher);    break;
+                case "7": research(teacher);               break;
                 case "0": return;
                 default:  System.out.println("Unknown option.");
             }
@@ -126,8 +132,70 @@ public class TeacherView extends BaseView {
         return null;
     }
 
+    private static void research(Teacher t) throws IOException {
+        Researcher r = Database.getInstance().getResearcherByUserId(t.getId());
+        if (r == null) {
+            System.out.println("Research access requires PROFESSOR title.");
+            return;
+        }
+        while (true) {
+            System.out.println("-- RESEARCH (h-index: " + r.getHIndex() + ") --");
+            System.out.println("1) View my papers");
+            System.out.println("2) Add paper");
+            if (r instanceof TeacherResearcher) {
+                System.out.println("3) Apply for grant");
+            }
+            System.out.println("0) Back");
+            String c = prompt("> ");
+            switch (c) {
+                case "1": listPapers(r);               break;
+                case "2": addPaper(r, t.getFullName()); break;
+                case "3":
+                    if (r instanceof TeacherResearcher) {
+                        String grant = prompt("Grant name: ");
+                        ((TeacherResearcher) r).applyForGrant(grant);
+                    }
+                    break;
+                case "0": return;
+                default: System.out.println("Unknown option.");
+            }
+        }
+    }
+
+    private static void listPapers(Researcher r) {
+        if (r.getPapers().isEmpty()) {
+            System.out.println("No papers yet.");
+            return;
+        }
+        System.out.println("Papers:");
+        for (ResearchPaper p : r.getPapers()) {
+            System.out.println("  " + p);
+        }
+    }
+
+    private static void addPaper(Researcher r, String authorName) throws IOException {
+        String doi       = prompt("DOI: ");
+        String title     = prompt("Title: ");
+        String journal   = prompt("Journal: ");
+        int pages        = parseInt(prompt("Pages: "));
+        int year         = parseInt(prompt("Year (YYYY): "));
+        int citations    = parseInt(prompt("Citations: "));
+        ResearchPaper paper = new ResearchPaper(doi, title, journal, pages,
+                LocalDate.of(year == 0 ? LocalDate.now().getYear() : year, 1, 1));
+        paper.addAuthor(authorName);
+        paper.setCitations(citations);
+        r.addPaper(paper);
+        Database.getInstance().getPapers().put(doi, paper);
+        System.out.println("Paper added. h-index now: " + r.getHIndex());
+    }
+
     private static double parseDouble(String s) {
         try { return Double.parseDouble(s); }
+        catch (NumberFormatException e) { return 0; }
+    }
+
+    private static int parseInt(String s) {
+        try { return Integer.parseInt(s.trim()); }
         catch (NumberFormatException e) { return 0; }
     }
 }

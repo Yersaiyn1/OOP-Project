@@ -46,12 +46,6 @@ public class TeacherFactory extends UserFactory {
                 title
         );
 
-        // Auto-wrap PROFESSOR as a Researcher.
-        // The wrapper is created and discarded here; in real flows you
-        // would store both the Teacher and the wrapping Researcher.
-        if (title == TeacherTitle.PROFESSOR) {
-            new TeacherResearcher(t);
-        }
         return t;
     }
 

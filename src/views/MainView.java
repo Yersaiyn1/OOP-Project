@@ -27,6 +27,7 @@ public class MainView extends BaseView {
         while (true) {
             heading("UNIVERSITY SYSTEM");
             System.out.println("1) Login");
+            System.out.println("2) Register");
             System.out.println("0) Quit");
             String choice = prompt("> ");
 
@@ -35,6 +36,12 @@ public class MainView extends BaseView {
                     User user = LoginView.show();
                     if (user != null) {
                         dispatch(user);
+                    }
+                    break;
+                case "2":
+                    User registered = RegisterView.show();
+                    if (registered != null) {
+                        dispatch(registered);
                     }
                     break;
                 case "0":

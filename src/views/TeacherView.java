@@ -74,16 +74,46 @@ public class TeacherView extends BaseView {
     private static void putMark(Teacher t) throws IOException {
         Course c = pickCourse(t);
         if (c == null) return;
-        String studentId = prompt("Student id (in DB): ");
-        User u = Database.getInstance().getUsers().get(studentId);
+
+        List<Student> students = t.viewStudents(c);
+        if (students.isEmpty()) {
+            System.out.println("No students enrolled in this course.");
+            return;
+        }
+        System.out.println("Enrolled students:");
+        for (Student st : students) {
+            System.out.printf("  [%s] %s%n", st.getId(), st.getFullName());
+        }
+
+        String sid = prompt("Student id: ");
+        User u = Database.getInstance().getUsers().get(sid);
         if (!(u instanceof Student)) {
             System.out.println("Not a student.");
             return;
         }
-        double f = parseDouble(prompt("First attestation: "));
-        double s = parseDouble(prompt("Second attestation: "));
-        double e = parseDouble(prompt("Final exam: "));
-        boolean ok = MarkController.putMark((Student) u, c, f, s, e);
+        Student student = (Student) u;
+
+        System.out.println("Mark component:");
+        System.out.println("  1) Attestation 1");
+        System.out.println("  2) Attestation 2");
+        System.out.println("  3) Final Exam");
+        String comp = prompt("> ");
+
+        boolean ok;
+        switch (comp) {
+            case "1":
+                ok = MarkController.putAtt1(student, c, parseDouble(prompt("Attestation 1 (0-100): ")));
+                break;
+            case "2":
+                ok = MarkController.putAtt2(student, c, parseDouble(prompt("Attestation 2 (0-100): ")));
+                break;
+            case "3":
+                ok = MarkController.putFinal(student, c, parseDouble(prompt("Final exam (0-100): ")));
+                break;
+            default:
+                System.out.println("Unknown option.");
+                return;
+        }
         System.out.println(ok ? "Mark recorded." : "Failed.");
     }
 

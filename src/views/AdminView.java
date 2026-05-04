@@ -238,7 +238,7 @@ public class AdminView extends BaseView {
             System.out.println("That id is not a Teacher."); return;
         }
 
-        c.getInstructors().add((Teacher) u);
+        ((Teacher) u).manageCourse(c);
         System.out.println("Assigned " + u.getFullName() + " to " + c);
     }
 

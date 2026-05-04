@@ -57,7 +57,7 @@ public class Main {
         Logger.getInstance().log("seeded default users");
         System.out.println();
         System.out.println("=== Default accounts ===");
-        System.out.println("Admin   — email: admin@kbtu.kz   | password: admin");
+        System.out.println("Admin — email: admin@kbtu.kz | password: admin");
         System.out.println("Student — email: student@kbtu.kz | password: student");
         System.out.println("Teacher — email: teacher@kbtu.kz | password: teacher");
         System.out.println("========================");

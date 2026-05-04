@@ -35,17 +35,11 @@ public class Admin extends Employee {
         return "Admin";
     }
 
-    /**
-      - Register a new user in the system.
-     */
     public void addUser(User u) {
         if (u == null) return;
         Database.getInstance().getUsers().put(u.getId(), u);
     }
 
-    /**
-      - Remove a user by id.
-     */
     public void removeUser(User u) {
         if (u == null) return;
         Database.getInstance().getUsers().remove(u.getId());
@@ -62,19 +56,16 @@ public class Admin extends Employee {
         }
     }
 
-    /**
-     - Read-only view of the system audit log.
-     */
     public List<LogEntry> viewLogs() {
         return Database.getInstance().getLogs();
     }
 
-    public void setAccessLevel(int accessLevel) {
-        this.accessLevel = accessLevel;
-    }
-
     public int getAccessLevel() {
         return accessLevel;
+    }
+
+    public void setAccessLevel(int accessLevel) {
+        this.accessLevel = accessLevel;
     }
 
 }

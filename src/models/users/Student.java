@@ -86,9 +86,6 @@ public class Student extends User implements Comparable<Student>, Reportable {
         }
     }
 
-    /**
-     * Read-only view of the student's marks (one per registered course).
-     */
     public List<Mark> viewMarks() {
         return new ArrayList<>(transcript.getMarks().values());
     }
@@ -97,9 +94,6 @@ public class Student extends User implements Comparable<Student>, Reportable {
         return transcript;
     }
 
-    /**
-     * Rate a teacher (0..5). Updates the teacher's running average.
-     */
     public void rateTeacher(Teacher t, double rating) {
         if (t == null) return;
         if (rating < 0 || rating > 5) {
@@ -108,9 +102,6 @@ public class Student extends User implements Comparable<Student>, Reportable {
         t.receiveRating(rating);
     }
 
-    /**
-     * Sum of credits across currently-enrolled courses.
-     */
     public int getTotalCredits() {
         int total = 0;
         for (Course c : enrolledCourses) {
@@ -143,9 +134,6 @@ public class Student extends User implements Comparable<Student>, Reportable {
         if (letter != null) recommendations.add(letter);
     }
 
-    /**
-     * Default ordering: by GPA descending. Demonstrates Comparable.
-     */
     @Override
     public int compareTo(Student o) {
         if (o == null) return -1;
@@ -161,17 +149,51 @@ public class Student extends User implements Comparable<Student>, Reportable {
         return s.build(data);
     }
 
-    public String getStudentId()             { return studentId; }
-    public Major getMajor()                  { return major; }
-    public StudyYear getYear()               { return year; }
-    public double getGpa()                   { return gpa; }
-    public List<Course> getEnrolledCourses() { return enrolledCourses; }
-    public int getFailedCoursesCount()       { return failedCoursesCount; }
-    public Researcher getSupervisor()        { return supervisor; }
+    public String getStudentId() {
+        return studentId;
+    }
 
-    public void setMajor(Major major)              { this.major = major; }
-    public void setYear(StudyYear year)            { this.year = year; }
-    public void setGpa(double gpa)                 { this.gpa = gpa; }
-    public void setFailedCoursesCount(int count)   { this.failedCoursesCount = count; }
-    public void incrementFailedCourses()           { this.failedCoursesCount++; }
+    public Major getMajor() {
+        return major;
+    }
+
+    public StudyYear getYear() {
+        return year;
+    }
+
+    public double getGpa() {
+        return gpa;
+    }
+
+    public List<Course> getEnrolledCourses() {
+        return enrolledCourses;
+    }
+
+    public int getFailedCoursesCount() {
+        return failedCoursesCount;
+    }
+
+    public Researcher getSupervisor() {
+        return supervisor;
+    }
+
+    public void setMajor(Major major) {
+        this.major = major;
+    }
+
+    public void setYear(StudyYear year) {
+        this.year = year;
+    }
+
+    public void setGpa(double gpa) {
+        this.gpa = gpa;
+    }
+
+    public void setFailedCoursesCount(int count) {
+        this.failedCoursesCount = count;
+    }
+
+    public void incrementFailedCourses() {
+        this.failedCoursesCount++;
+    }
 }

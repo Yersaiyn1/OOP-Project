@@ -35,12 +35,15 @@ public abstract class Employee extends User {
                 getFullName(), to.getFullName(), text);
     }
 
+
     public void setSalary(double salary) {
         this.salary = salary;
     }
-    public void setHireDate(LocalDate hireDate)  {
+
+    public void setHireDate(LocalDate hireDate) {
         this.hireDate = hireDate;
     }
+
     public void setDepartment(String department) {
         this.department = department;
     }
@@ -48,12 +51,16 @@ public abstract class Employee extends User {
     public double getSalary() {
         return salary;
     }
+
     public LocalDate getHireDate() {
         return hireDate;
     }
+
     public String getDepartment() {
         return department;
     }
+
+
 
 
 }

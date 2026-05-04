@@ -8,9 +8,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * RecommendationLetter — BONUS feature.
- *
- * Written by a Teacher about a Student for a specific purpose
+ * RecommendationLetter written by a Teacher about a Student for a specific purpose
  * (job application, scholarship, exchange program, ...).
  */
 public class RecommendationLetter implements Serializable {
@@ -34,9 +32,6 @@ public class RecommendationLetter implements Serializable {
         this.issuedAt = LocalDateTime.now();
     }
 
-    /**
-     * Print the letter as a formatted document.
-     */
     public String export() {
         StringBuilder sb = new StringBuilder();
         sb.append("=== Recommendation Letter ===").append(System.lineSeparator());
@@ -52,15 +47,37 @@ public class RecommendationLetter implements Serializable {
         return sb.toString();
     }
 
-    public String getLetterId()         { return letterId; }
-    public Teacher getAuthor()          { return author; }
-    public Student getRecipient()       { return recipient; }
-    public String getContent()          { return content; }
-    public LocalDateTime getIssuedAt()  { return issuedAt; }
-    public String getPurpose()          { return purpose; }
+    public String getLetterId() {
+        return letterId;
+    }
 
-    public void setContent(String content) { this.content = content; }
-    public void setPurpose(String purpose) { this.purpose = purpose; }
+    public Teacher getAuthor() {
+        return author;
+    }
+
+    public Student getRecipient() {
+        return recipient;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public LocalDateTime getIssuedAt() {
+        return issuedAt;
+    }
+
+    public String getPurpose() {
+        return purpose;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public void setPurpose(String purpose) {
+        this.purpose = purpose;
+    }
 
     @Override
     public String toString() {

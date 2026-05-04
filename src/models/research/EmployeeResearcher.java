@@ -20,6 +20,7 @@ public class EmployeeResearcher extends ResearcherDecorator {
     public String getLabName() {
         return labName;
     }
+
     public void setLabName(String labName) {
         this.labName = labName;
     }

@@ -48,36 +48,37 @@ public abstract class User implements Observer, Serializable {
 
     public abstract String getRole();
 
-    // ----- Observer -----
-
     @Override
     public void update(NewsEvent event) {
         if (event == null || event.getNews() == null) return;
         System.out.printf("[news -> %s] %s%n",
-                this.getFullName(), event.getNews()); //event.getNews().getTitle() mb?
+                this.getFullName(), event.getNews());
     }
 
-    // setters
 
-    public void setFirstName(String firstName){
+    public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
-    public void setLastName(String lastName){
+
+    public void setLastName(String lastName) {
         this.lastName = lastName;
     }
-    public void setEmail(String email){
+
+    public void setEmail(String email) {
         this.email = email;
     }
-    public void setPassword(String password){
+
+    public void setPassword(String password) {
         this.password = password;
     }
-    public void setPhone(String phone){
+
+    public void setPhone(String phone) {
         this.phone = phone;
     }
 
-    //  getters
+    //----
 
-    public String getId(){
+    public String getId() {
         return id;
     }
 
@@ -85,26 +86,27 @@ public abstract class User implements Observer, Serializable {
         return firstName;
     }
 
-    public String getLastName(){
+    public String getLastName() {
         return lastName;
     }
 
-    public String getEmail(){
+    public String getEmail() {
         return email;
     }
 
-    public String getPhone(){
+    public String getPhone() {
         return phone;
     }
 
-    public LocalDateTime getCreatedAt(){
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
-
 
     public String getFullName() {
         return firstName + " " + lastName;
     }
+
+
 
     @Override
     public boolean equals(Object o) {

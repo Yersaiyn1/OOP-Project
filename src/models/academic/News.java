@@ -27,14 +27,33 @@ public class News implements Serializable {
         this.publishedAt = LocalDateTime.now();
     }
 
-    public String getNewsId()             { return newsId; }
-    public String getTitle()              { return title; }
-    public String getContent()            { return content; }
-    public LocalDateTime getPublishedAt() { return publishedAt; }
-    public Employee getAuthor()           { return author; }
+    public String getNewsId() {
+        return newsId;
+    }
 
-    public void setTitle(String title)     { this.title = title; }
-    public void setContent(String content) { this.content = content; }
+    public String getTitle() {
+        return title;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public LocalDateTime getPublishedAt() {
+        return publishedAt;
+    }
+
+    public Employee getAuthor() {
+        return author;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
 
     @Override
     public String toString() {

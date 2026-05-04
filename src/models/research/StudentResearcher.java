@@ -17,15 +17,16 @@ public class StudentResearcher extends ResearcherDecorator {
         this.thesisTopic = thesisTopic;
     }
 
-    /**
-     - Mark the thesis as submitted. In a fuller implementation this would
-     - register the thesis with the dean's office.
-     */
     public void submitThesis() {
         System.out.printf("[thesis] %s submitted: \"%s\"%n",
                 wrapped.getFullName(), thesisTopic);
     }
 
-    public String getThesisTopic()              { return thesisTopic; }
-    public void setThesisTopic(String topic)    { this.thesisTopic = topic; }
+    public String getThesisTopic() {
+        return thesisTopic;
+    }
+
+    public void setThesisTopic(String topic) {
+        this.thesisTopic = topic;
+    }
 }

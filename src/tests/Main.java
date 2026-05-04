@@ -46,8 +46,8 @@ public class Main {
         Logger.getInstance().log("seeded default admin (email=admin@kbtu.kz, password=admin)");
         System.out.println();
         System.out.println("=== Default admin seeded ===");
-        System.out.println("  email:    admin@kbtu.kz");
-        System.out.println("  password: admin");
+        System.out.println("email: admin@kbtu.kz");
+        System.out.println("password: admin");
         System.out.println("============================");
         System.out.println();
     }

@@ -70,17 +70,45 @@ public class Mark implements Serializable {
         return getTotal() >= 50 && finalExam >= 50;
     }
 
-    public double getFirstAttestation()       { return firstAttestation; }
-    public double getSecondAttestation()      { return secondAttestation; }
-    public double getFinalExam()              { return finalExam; }
-    public Course getCourse()                 { return course; }
-    public Student getStudent()               { return student; }
+    public double getFirstAttestation() {
+        return firstAttestation;
+    }
 
-    public void setFirstAttestation(double v)  { this.firstAttestation = v; }
-    public void setSecondAttestation(double v) { this.secondAttestation = v; }
-    public void setFinalExam(double v)         { this.finalExam = v; }
-    public void setCourse(Course course)       { this.course = course; }
-    public void setStudent(Student student)    { this.student = student; }
+    public double getSecondAttestation() {
+        return secondAttestation;
+    }
+
+    public double getFinalExam() {
+        return finalExam;
+    }
+
+    public Course getCourse() {
+        return course;
+    }
+
+    public Student getStudent() {
+        return student;
+    }
+
+    public void setFirstAttestation(double v) {
+        this.firstAttestation = v;
+    }
+
+    public void setSecondAttestation(double v) {
+        this.secondAttestation = v;
+    }
+
+    public void setFinalExam(double v) {
+        this.finalExam = v;
+    }
+
+    public void setCourse(Course course) {
+        this.course = course;
+    }
+
+    public void setStudent(Student student) {
+        this.student = student;
+    }
 
     @Override
     public String toString() {

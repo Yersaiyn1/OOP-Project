@@ -26,9 +26,6 @@ public class Report implements Serializable {
         this.generatedAt = LocalDateTime.now();
     }
 
-    /**
-     * Render this report as a printable string.
-     */
     public String export() {
         StringBuilder sb = new StringBuilder();
         sb.append("=== ").append(title).append(" ===").append(System.lineSeparator());
@@ -42,13 +39,29 @@ public class Report implements Serializable {
         return sb.toString();
     }
 
-    public String getReportId()             { return reportId; }
-    public String getTitle()                { return title; }
-    public Map<String, Object> getData()    { return data; }
-    public LocalDateTime getGeneratedAt()   { return generatedAt; }
+    public String getReportId() {
+        return reportId;
+    }
 
-    public void setTitle(String title)      { this.title = title; }
-    public void put(String key, Object val) { this.data.put(key, val); }
+    public String getTitle() {
+        return title;
+    }
+
+    public Map<String, Object> getData() {
+        return data;
+    }
+
+    public LocalDateTime getGeneratedAt() {
+        return generatedAt;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void put(String key, Object val) {
+        this.data.put(key, val);
+    }
 
     @Override
     public String toString() {

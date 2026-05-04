@@ -51,9 +51,6 @@ public class Transcript implements Reportable, Serializable {
         return this.gpa;
     }
 
-    /**
-     * Generate an AcademicReport using the Strategy pattern.
-     */
     @Override
     public Report generateReport() {
         ReportStrategy strategy = new AcademicReportStrategy();
@@ -79,11 +76,21 @@ public class Transcript implements Reportable, Serializable {
         }
     }
 
-    public Student getStudent()         { return student; }
-    public Map<Course, Mark> getMarks() { return marks; }
-    public double getGpa()              { return gpa; }
+    public Student getStudent() {
+        return student;
+    }
 
-    public void setStudent(Student s)   { this.student = s; }
+    public Map<Course, Mark> getMarks() {
+        return marks;
+    }
+
+    public double getGpa() {
+        return gpa;
+    }
+
+    public void setStudent(Student s) {
+        this.student = s;
+    }
 
     @Override
     public String toString() {

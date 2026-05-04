@@ -55,9 +55,6 @@ public class ResearchProject implements Serializable {
         }
     }
 
-    /**
-     * Convenience overload: add an already-typed Researcher directly.
-     */
     public void addParticipant(Researcher r) {
         if (r == null) return;
         if (!participants.contains(r)) {
@@ -71,14 +68,33 @@ public class ResearchProject implements Serializable {
         publishedPapers.add(p);
     }
 
-    public String getProjectId()                    { return projectId; }
-    public String getTopic()                        { return topic; }
-    public LocalDate getStartDate()                 { return startDate; }
-    public List<ResearchPaper> getPublishedPapers() { return publishedPapers; }
-    public List<Researcher> getParticipants()       { return participants; }
+    public String getProjectId() {
+        return projectId;
+    }
 
-    public void setTopic(String topic)              { this.topic = topic; }
-    public void setStartDate(LocalDate startDate)   { this.startDate = startDate; }
+    public String getTopic() {
+        return topic;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public List<ResearchPaper> getPublishedPapers() {
+        return publishedPapers;
+    }
+
+    public List<Researcher> getParticipants() {
+        return participants;
+    }
+
+    public void setTopic(String topic) {
+        this.topic = topic;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
 
     @Override
     public String toString() {

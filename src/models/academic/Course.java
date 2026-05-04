@@ -65,19 +65,53 @@ public class Course implements Serializable {
         lessons.add(lesson);
     }
 
-    public String getCourseId()              { return courseId; }
-    public String getName()                  { return name; }
-    public int getCredits()                  { return credits; }
-    public Major getTargetMajor()            { return targetMajor; }
-    public StudyYear getTargetYear()         { return targetYear; }
-    public List<Teacher> getInstructors()    { return instructors; }
-    public List<Student> getEnrolledStudents() { return enrolledStudents; }
-    public List<Lesson> getLessons()         { return lessons; }
+    public String getCourseId() {
+        return courseId;
+    }
 
-    public void setName(String name)                 { this.name = name; }
-    public void setCredits(int credits)              { this.credits = credits; }
-    public void setTargetMajor(Major targetMajor)    { this.targetMajor = targetMajor; }
-    public void setTargetYear(StudyYear targetYear)  { this.targetYear = targetYear; }
+    public String getName() {
+        return name;
+    }
+
+    public int getCredits() {
+        return credits;
+    }
+
+    public Major getTargetMajor() {
+        return targetMajor;
+    }
+
+    public StudyYear getTargetYear() {
+        return targetYear;
+    }
+
+    public List<Teacher> getInstructors() {
+        return instructors;
+    }
+
+    public List<Student> getEnrolledStudents() {
+        return enrolledStudents;
+    }
+
+    public List<Lesson> getLessons() {
+        return lessons;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setCredits(int credits) {
+        this.credits = credits;
+    }
+
+    public void setTargetMajor(Major targetMajor) {
+        this.targetMajor = targetMajor;
+    }
+
+    public void setTargetYear(StudyYear targetYear) {
+        this.targetYear = targetYear;
+    }
 
     @Override
     public boolean equals(Object o) {

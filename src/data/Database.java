@@ -1,7 +1,7 @@
 package data;
 
 import core.Logger;
-import models.academic.Course; // Import Course
+import models.academic.Course;
 import models.users.User;
 
 import java.io.FileInputStream;
@@ -12,11 +12,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection; // Import Collection
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors; // Import Collectors
+import java.util.stream.Collectors;
 
 public class Database implements Serializable {
 
@@ -39,16 +38,34 @@ public class Database implements Serializable {
         return INSTANCE;
     }
 
-    // --- accessors ---
-    public Map<String, User>   getUsers()    { return users; }
-    public Map<String, Object> getCourses()  { return courses; }
-    public Map<String, Object> getPapers()   { return papers; }
-    public Map<String, Object> getProjects() { return projects; }
-    public Map<String, Object> getNews()     { return news; }
-    public Map<String, Object> getRequests() { return requests; }
-    public List<LogEntry>      getLogs()     { return logs; }
+    public Map<String, User> getUsers() {
+        return users;
+    }
 
-    // --- New methods for controllers ---
+    public Map<String, Object> getCourses() {
+        return courses;
+    }
+
+    public Map<String, Object> getPapers() {
+        return papers;
+    }
+
+    public Map<String, Object> getProjects() {
+        return projects;
+    }
+
+    public Map<String, Object> getNews() {
+        return news;
+    }
+
+    public Map<String, Object> getRequests() {
+        return requests;
+    }
+
+    public List<LogEntry> getLogs() {
+        return logs;
+    }
+
 
     public User getUserById(String id) {
         return users.get(id);
@@ -78,8 +95,6 @@ public class Database implements Serializable {
                 .map(obj -> (Course) obj)
                 .collect(Collectors.toList());
     }
-
-    // --- persistence ---
 
     public void save() {
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(DB_FILE))) {

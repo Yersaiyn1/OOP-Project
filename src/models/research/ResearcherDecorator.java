@@ -91,7 +91,7 @@ public abstract class ResearcherDecorator implements Researcher, Serializable {
     protected void recomputeHIndex() {
         List<Integer> citations = new ArrayList<>();
         for (ResearchPaper p : papers) {
-            citations.add(p.getCitations()); // getCitations
+            citations.add(p.getCitations());
         }
         citations.sort((a, b) -> b - a); // descending
         int h = 0;

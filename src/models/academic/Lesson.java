@@ -13,8 +13,6 @@ import java.util.Map;
  * Lesson — a single class session within a Course.
  *
  * Holds an attendance map: Student -> Boolean (present?).
- * markAttendance() updates that map and (BONUS) generates an
- * AttendanceRecord for audit purposes.
  */
 public class Lesson implements Serializable {
 
@@ -36,10 +34,6 @@ public class Lesson implements Serializable {
         this.instructor = instructor;
     }
 
-    /**
-     * Mark a student's attendance for this lesson.
-     * Returns the AttendanceRecord that was generated (BONUS).
-     */
     public AttendanceRecord markAttendance(Student student, boolean present) {
         if (student == null) return null;
         attendance.put(student, present);
@@ -50,17 +44,45 @@ public class Lesson implements Serializable {
         return attendance.getOrDefault(s, false);
     }
 
-    public String getLessonId()                  { return lessonId; }
-    public LessonType getType()                  { return type; }
-    public LocalDateTime getDate()               { return date; }
-    public Course getCourse()                    { return course; }
-    public Teacher getInstructor()               { return instructor; }
-    public Map<Student, Boolean> getAttendance() { return attendance; }
+    public String getLessonId() {
+        return lessonId;
+    }
 
-    public void setType(LessonType type)              { this.type = type; }
-    public void setDate(LocalDateTime date)           { this.date = date; }
-    public void setCourse(Course course)              { this.course = course; }
-    public void setInstructor(Teacher instructor)     { this.instructor = instructor; }
+    public LessonType getType() {
+        return type;
+    }
+
+    public LocalDateTime getDate() {
+        return date;
+    }
+
+    public Course getCourse() {
+        return course;
+    }
+
+    public Teacher getInstructor() {
+        return instructor;
+    }
+
+    public Map<Student, Boolean> getAttendance() {
+        return attendance;
+    }
+
+    public void setType(LessonType type) {
+        this.type = type;
+    }
+
+    public void setDate(LocalDateTime date) {
+        this.date = date;
+    }
+
+    public void setCourse(Course course) {
+        this.course = course;
+    }
+
+    public void setInstructor(Teacher instructor) {
+        this.instructor = instructor;
+    }
 
     @Override
     public String toString() {

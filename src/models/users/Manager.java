@@ -39,9 +39,6 @@ public class Manager extends Employee {
         return "Manager";
     }
 
-    /**
-     * Approve a course registration request.
-     */
     public void approveRegistration(Request r) {
         if (r == null) return;
         r.setStatus(RequestStatus.APPROVED);
@@ -69,18 +66,11 @@ public class Manager extends Employee {
         Database.getInstance().getCourses().put(c.getCourseId(), c);
     }
 
-    /**
-     * Assign a teacher to a course.
-     */
     public void assignCourse(Teacher t, Course c) {
         if (t == null || c == null) return;
         t.manageCourse(c);
     }
 
-    /**
-     * Generate an academic report (placeholder — managers may extend this
-     * with school-wide statistics).
-     */
     public Report generateAcademicReport() {
         Report r = new Report("Academic Report — " + getDepartment());
         r.put("manager", getFullName());
@@ -89,9 +79,6 @@ public class Manager extends Employee {
         return r;
     }
 
-    /**
-     * Publish a piece of news through NewsService.
-     */
     public void manageNews(News n) {
         if (n == null) return;
         Database.getInstance().getNews().put(n.getNewsId(), n);
@@ -106,7 +93,18 @@ public class Manager extends Employee {
         return n;
     }
 
-    public ManagerType getType()                    { return type; }
-    public List<Request> getManagedRequests()       { return managedRequests; }
-    public void setType(ManagerType type)           { this.type = type; }
+    public void setType(ManagerType type) {
+        this.type = type;
+    }
+
+    public ManagerType getType()
+    {
+        return type;
+    }
+
+    public List<Request> getManagedRequests() {
+        return managedRequests;
+    }
+
+
 }

@@ -20,8 +20,13 @@ public class NewsEvent implements Serializable {
         this.timestamp = LocalDateTime.now();
     }
 
-    public News getNews()                { return news; }
-    public LocalDateTime getTimestamp()  { return timestamp; }
+    public News getNews() {
+        return news;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
 
     @Override
     public String toString() {

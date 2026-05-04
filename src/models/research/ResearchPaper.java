@@ -45,23 +45,69 @@ public class ResearchPaper implements Comparable<ResearchPaper>, Serializable {
         if (keyword != null) keywords.add(keyword);
     }
 
-    public String getDoi()                 { return doi; }
-    public String getTitle()               { return title; }
-    public List<String> getAuthors()       { return authors; }
-    public String getJournal()             { return journal; }
-    public int getPages()                  { return pages; }
-    public LocalDate getPublishDate()      { return publishDate; }
-    public int getCitations()              { return citations; }
-    public String getAbstractText()        { return abstractText; }
-    public List<String> getKeywords()      { return keywords; }
+    public String getDoi() {
+        return doi;
+    }
 
-    public void setDoi(String doi)                       { this.doi = doi; }
-    public void setTitle(String title)                   { this.title = title; }
-    public void setJournal(String journal)               { this.journal = journal; }
-    public void setPages(int pages)                      { this.pages = pages; }
-    public void setPublishDate(LocalDate publishDate)    { this.publishDate = publishDate; }
-    public void setCitations(int citations)              { this.citations = citations; }
-    public void setAbstractText(String abstractText)     { this.abstractText = abstractText; }
+    public String getTitle() {
+        return title;
+    }
+
+    public List<String> getAuthors() {
+        return authors;
+    }
+
+    public String getJournal() {
+        return journal;
+    }
+
+    public int getPages() {
+        return pages;
+    }
+
+    public LocalDate getPublishDate() {
+        return publishDate;
+    }
+
+    public int getCitations() {
+        return citations;
+    }
+
+    public String getAbstractText() {
+        return abstractText;
+    }
+
+    public List<String> getKeywords() {
+        return keywords;
+    }
+
+    public void setDoi(String doi) {
+        this.doi = doi;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setJournal(String journal) {
+        this.journal = journal;
+    }
+
+    public void setPages(int pages) {
+        this.pages = pages;
+    }
+
+    public void setPublishDate(LocalDate publishDate) {
+        this.publishDate = publishDate;
+    }
+
+    public void setCitations(int citations) {
+        this.citations = citations;
+    }
+
+    public void setAbstractText(String abstractText) {
+        this.abstractText = abstractText;
+    }
 
     /**
      * Default ordering: most recent first. SortByDateStrategy uses this.

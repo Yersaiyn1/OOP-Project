@@ -7,8 +7,6 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * AttendanceRecord — BONUS feature.
- *
  * One immutable record per Lesson.markAttendance() call.
  * Used for generating attendance reports per course/student.
  */
@@ -30,11 +28,25 @@ public class AttendanceRecord implements Serializable {
         this.timestamp = LocalDateTime.now();
     }
 
-    public String getRecordId()           { return recordId; }
-    public Student getStudent()           { return student; }
-    public Lesson getLesson()             { return lesson; }
-    public boolean isPresent()            { return present; }
-    public LocalDateTime getTimestamp()   { return timestamp; }
+    public String getRecordId() {
+        return recordId;
+    }
+
+    public Student getStudent() {
+        return student;
+    }
+
+    public Lesson getLesson() {
+        return lesson;
+    }
+
+    public boolean isPresent() {
+        return present;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
 
     @Override
     public String toString() {

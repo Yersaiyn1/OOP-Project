@@ -47,10 +47,6 @@ public class Teacher extends Employee implements Reportable {
         return "Teacher";
     }
 
-    /**
-     * Put a mark for a student in a course. The mark is added to the
-     * student's transcript.
-     */
     public void putMark(Student s, Course c, Mark m) {
         if (s == null || c == null || m == null) return;
         m.setStudent(s);
@@ -61,9 +57,6 @@ public class Teacher extends Employee implements Reportable {
         }
     }
 
-    /**
-     * View students enrolled in one of this teacher's courses.
-     */
     public List<Student> viewStudents(Course c) {
         if (c == null) return new ArrayList<>();
         return c.getEnrolledStudents();
@@ -85,11 +78,6 @@ public class Teacher extends Employee implements Reportable {
         return title == TeacherTitle.PROFESSOR;
     }
 
-    /**
-     * Walk the course's lessons and mark every enrolled student as present
-     * for the most recent lesson. Demo implementation — in real life the
-     * teacher would supply attendance per-student.
-     */
     public void takeAttendance(Course c) {
         if (c == null || c.getLessons().isEmpty()) return;
         Lesson latest = c.getLessons().get(c.getLessons().size() - 1);
@@ -98,9 +86,6 @@ public class Teacher extends Employee implements Reportable {
         }
     }
 
-    /**
-     * Generate a mark report for a course (BONUS: TeacherReportStrategy).
-     */
     public Report generateMarkReport(Course c) {
         ReportStrategy s = new TeacherReportStrategy();
         Map<String, Object> data = new HashMap<>();
@@ -109,10 +94,6 @@ public class Teacher extends Employee implements Reportable {
         return s.build(data);
     }
 
-    /**
-     * Write a recommendation letter for a student (BONUS).
-     * The letter is also pushed onto the student's recommendations list.
-     */
     public RecommendationLetter writeRecommendation(Student s, String content, String purpose) {
         if (s == null) return null;
         RecommendationLetter letter = new RecommendationLetter(this, s, content, purpose);
@@ -131,10 +112,6 @@ public class Teacher extends Employee implements Reportable {
         rating = total / ratingCount;
     }
 
-    /**
-     * Reportable: the teacher's own self-report (uses the same strategy
-     * as generateMarkReport for the first taught course, if any).
-     */
     @Override
     public Report generateReport() {
         Report r = new Report("Teacher Report — " + getFullName());
@@ -145,10 +122,25 @@ public class Teacher extends Employee implements Reportable {
         return r;
     }
 
-    public TeacherTitle getTitle()          { return title; }
-    public List<Course> getCoursesTaught()  { return coursesTaught; }
-    public double getRating()               { return rating; }
-    public int getRatingCount()             { return ratingCount; }
+    public void setTitle(TeacherTitle title) {
+        this.title = title;
+    }
 
-    public void setTitle(TeacherTitle title) { this.title = title; }
+    public TeacherTitle getTitle() {
+        return title;
+    }
+
+    public List<Course> getCoursesTaught() {
+        return coursesTaught;
+    }
+
+    public double getRating() {
+        return rating;
+    }
+
+    public int getRatingCount() {
+        return ratingCount;
+    }
+
+
 }

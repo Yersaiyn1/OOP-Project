@@ -30,15 +30,37 @@ public class Request implements Serializable {
         this.createdAt = LocalDateTime.now();
     }
 
-    public String getRequestId()         { return requestId; }
-    public Employee getSender()          { return sender; }
-    public String getType()              { return type; }
-    public RequestStatus getStatus()     { return status; }
-    public LocalDateTime getCreatedAt()  { return createdAt; }
-    public String getDescription()       { return description; }
+    public String getRequestId() {
+        return requestId;
+    }
 
-    public void setStatus(RequestStatus status)        { this.status = status; }
-    public void setDescription(String description)     { this.description = description; }
+    public Employee getSender() {
+        return sender;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public RequestStatus getStatus() {
+        return status;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setStatus(RequestStatus status) {
+        this.status = status;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     @Override
     public String toString() {
